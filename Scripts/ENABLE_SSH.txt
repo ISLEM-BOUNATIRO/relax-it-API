@@ -1,0 +1,13 @@
+enable
+islem
+conf t
+username islem pass islem
+username islem priv 15
+line vty 0 4
+login local
+transport input all
+ip domain-name dgpostealgerie.com
+crypto key generate rsa
+1024
+end
+wr
