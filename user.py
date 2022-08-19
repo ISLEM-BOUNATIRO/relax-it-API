@@ -26,7 +26,7 @@ def add_user():
     )
     db.session.add(user)
     db.session.commit()
-    return {"Result":ADDED_SUCCESFULLY}
+    return {"result":ADDED_SUCCESFULLY}
 
 @app.route('/api/users/edit',methods=['POST'])
 def edit_user():
@@ -41,7 +41,7 @@ def edit_user():
     db.session.commit()
     db.session.add(newUser)
     db.session.commit()
-    return {"Result":EDITTED_SUCCESFULLY}
+    return {"result":EDITTED_SUCCESFULLY}
 
 @app.route('/api/users/delete',methods=['POST'])
 def delete_user():
@@ -52,10 +52,10 @@ def delete_user():
         user=User.query.filter_by(username=username).first()
         db.session.delete(user)
         db.session.commit()
-        return {"Result":DELETED_SUCCESFULLY}
+        return {"result":DELETED_SUCCESFULLY}
     except NameError:
         print(NameError)
-        return {"Result":DELETE_ERROR}
+        return {"result":DELETE_ERROR}
 
 @app.route('/login',methods=['POST'])
 def login():

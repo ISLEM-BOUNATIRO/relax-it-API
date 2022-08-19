@@ -24,7 +24,7 @@ def add_script():
     )
     db.session.add(script)
     db.session.commit()
-    return {"Result":SUCCESS}
+    return {"result":SUCCESS}
 
 
 @app.route('/api/scripts/delete',methods=['POST'])
@@ -34,7 +34,7 @@ def delete_script():
     script=Script.query.filter_by(name=name).first()
     db.session.delete(script)
     db.session.commit()
-    return {"Result":SUCCESS}
+    return {"result":SUCCESS}
 
 @app.route('/api/scripts/edit',methods=['POST'])
 def edit_script():
@@ -48,4 +48,4 @@ def edit_script():
     db.session.commit()
     db.session.add(new_script)
     db.session.commit()
-    return {"Result":SUCCESS}
+    return {"result":SUCCESS}

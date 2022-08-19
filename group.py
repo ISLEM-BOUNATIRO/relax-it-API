@@ -4,14 +4,22 @@ from model import *
 @app.route('/api/groups')
 def get_groups():
     groups = Group.query.all()
-    group_schema = ScriptSchema(many=True)
+    group_schema = GroupSchema(many=True)
     output = group_schema.dump(groups)
+    return jsonify(output)
+
+@app.route('/api/group',methods=['POST'])
+def get_group():
+    name = request.json['name']
+    group = Group.query.filter_by(name=name).first()
+    group_schema = GroupSchema()
+    output = group_schema.dump(group)
     return jsonify(output)
 
 @app.route('/api/groups',methods=['POST'])
 def add_group():
     SUCCESS="1"
-    group = Group(name = request.json['group_name'],
+    group = Group(name = request.json['name'],
     description = request.json['description'],
     )
     db.session.add(group)
@@ -22,16 +30,16 @@ def add_group():
 @app.route('/api/groups/delete',methods=['POST'])
 def delete_group():
     SUCCESS="2"
-    name = request.json['group_name']
+    name = request.json['name']
     group=Group.query.filter_by(name=name).first()
     db.session.delete(group)
     db.session.commit()
     return {"result":SUCCESS}
 
-@app.route('/api/groups/edit',methods=['POST'])
-def edit_group():
+@app.route('/api/groups/edit2',methods=['POST'])
+def edit_group2():
     SUCCESS="3"
-    new_group = Group(name = request.json['group_name'],
+    new_group = Group(name = request.json['name'],
     description = request.json['description'],
     )
     group=Group.query.filter_by(name=new_group.name).first()
@@ -41,10 +49,18 @@ def edit_group():
     db.session.commit()
     return {"result":SUCCESS}
 
+@app.route('/api/groups/edit',methods=['POST'])
+def edit_group():
+    SUCCESS="3"
+    group=Group.query.filter_by(name=request.json['name']).first()
+    group.description = request.json['description']
+    db.session.commit()
+    return {"result":SUCCESS}
+
 @app.route('/api/groups/addmembers',methods=['POST'])
 def add_members():
     SUCCESS="4"
-    name = request.json['group_name']
+    name = request.json['name']
     new_members = request.json['members']
     group=Group.query.filter_by(name=name).first()
     list1=members_to_list(group.members)
@@ -59,7 +75,7 @@ def add_members():
 @app.route('/api/groups/deletemembers',methods=['POST'])
 def delete_members():
     SUCCESS="5"
-    name = request.json['group_name']
+    name = request.json['name']
     delete_members = request.json['members']
     group=Group.query.filter_by(name=name).first()
     list1=members_to_list(group.members)
@@ -74,7 +90,7 @@ def delete_members():
 @app.route('/api/groups/members',methods=['GET'])
 def get_members():
     SUCCESS="6"
-    name = request.json['group_name']
+    name = request.json['name']
     group=Group.query.filter_by(name=name).first()
     return {"result":SUCCESS,"members":group.members}
 def members_to_list(members):

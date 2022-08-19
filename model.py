@@ -45,6 +45,15 @@ class User(db.Model):
     email=Column(Text,default="")
     password=Column(Text)
 
+
+class Office(db.Model):
+    __tablename__ = 'office'
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String)
+    office_class = db.Column(String)
+    postal_code = db.Column(String)
+
+
 class DeviceSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Device
@@ -63,4 +72,9 @@ class GroupSchema(ma.SQLAlchemyAutoSchema):
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
+        load_instance = True
+
+class OfficeSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Office
         load_instance = True

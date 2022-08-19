@@ -24,6 +24,7 @@ from user import *
 from device import *
 from script import *
 from group import *
+from office import *
 from enable_ssh_disable_telnet import *
 from update_db import *
 
