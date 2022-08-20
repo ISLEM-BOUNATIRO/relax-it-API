@@ -22,6 +22,7 @@ def add_office():
     office = Office(name = request.json['name'],
     office_class = request.json['office_class'],
     postal_code = request.json['postal_code'],
+    wilaya = request.json['wilaya'],
     )
     db.session.add(office)
     db.session.commit()
@@ -43,6 +44,7 @@ def edit_office2():
     new_office = Office(name = request.json['name'],
     office_class = request.json['office_class'],
     postal_code = request.json['postal_code'],
+    wilaya = request.json['wilaya'],
     )
     office=Office.query.filter_by(name=new_office.name).first()
     db.session.delete(office)
@@ -57,6 +59,7 @@ def edit_office():
     office=Office.query.filter_by(name=request.json['name']).first()
     office.office_class = request.json['office_class']
     office.postal_code = request.json['postal_code']
+    office.wilaya = request.json['wilaya']
     db.session.commit()
     return {"result":SUCCESS}
 

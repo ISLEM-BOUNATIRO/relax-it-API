@@ -3,11 +3,6 @@ from app import db,ma
 from sqlalchemy import *
 from datetime import *
 
-groups = db.Table('groups',
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True),
-    db.Column('device_id', db.Integer, db.ForeignKey('device.id'), primary_key=True)
-)
-
 
 class Group(db.Model):
     __tablename__ = 'group'
@@ -26,8 +21,6 @@ class Device(db.Model):
     serial_number = db.Column(String)
     firmware_version = db.Column(String)
     creation_date = db.Column(db.DateTime, nullable=False,default=datetime.utcnow())
-    groups = db.relationship('Group', secondary=groups,lazy='subquery' 
-        ,backref=db.backref('devices',lazy=True))
 
 
 class Script(db.Model):
@@ -83,6 +76,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 class OfficeSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Office
+        additional = ["wilaya"]
         load_instance = True
 
 class WilayaSchema(ma.SQLAlchemyAutoSchema):

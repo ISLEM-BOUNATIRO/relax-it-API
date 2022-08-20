@@ -16,16 +16,27 @@ def get_device():
     output = device_schema.dump(device)
     return jsonify(output)
 
+@app.route('/api/devicelist',methods=['POST'])
+def get_devicelist():
+    iplist = request.json['iplist']
+    devices = Device.query.all()
+    devicelist=[]
+    for d in devices :
+        if (d.ip in iplist):
+            devicelist.append(d)
+    device_schema = DeviceSchema(many=True)
+    output = device_schema.dump(devicelist)
+    return jsonify(output)
+
 @app.route('/api/devices',methods=['POST'])
 def add_device():
     SUCCESS="1"
-    device = Device(ip = request.json['ip'])
-    """ firmware_version = request.json['firmware_version'],
-    model = request.json['model'],
-    serial_number = request.json['serial_number'],
+    device = Device(ip = request.json['ip'],
     type = request.json['type'],
-    vendor = request.json['vendor']"""
-    
+    model = request.json['model'],
+    vendor = request.json['vendor'],
+    serial_number = request.json['serial_number'],
+    firmware_version = request.json['firmware_version'])
     db.session.add(device)
     db.session.commit()
     return {"result":SUCCESS}
@@ -44,16 +55,11 @@ def delete_device():
 @app.route('/api/devices/edit',methods=['POST'])
 def edit_device():
     SUCCESS="3"
-    newDevice = Device(ip = request.json['ip'] )
-    """ firmware_version = request.json['firmware_version'],
-    model = request.json['model'],
-    serial_number = request.json['serial_number'],
-    type = request.json['type'],
-    vendor = request.json['vendor']"""
-
-    device=Device.query.filter_by(ip=newDevice.ip).first()
-    db.session.delete(device)
-    db.session.commit()
-    db.session.add(newDevice)
+    device=Device.query.filter_by(ip=request.json['ip']).first()
+    device.type = request.json['type'],
+    device.model = request.json['model'],
+    device.vendor = request.json['vendor'],
+    device.serial_number = request.json['serial_number'],
+    device.firmware_version = request.json['firmware_version']
     db.session.commit()
     return {"result":SUCCESS}
