@@ -52,7 +52,13 @@ class Office(db.Model):
     name = db.Column(String)
     office_class = db.Column(String)
     postal_code = db.Column(String)
+    wilaya = db.Column(String, ForeignKey('wilaya.name'))
 
+class Wilaya(db.Model):
+    __tablename__ = 'wilaya'
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String)
+    num = db.Column(Integer)
 
 class DeviceSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -77,4 +83,9 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 class OfficeSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Office
+        load_instance = True
+
+class WilayaSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Wilaya
         load_instance = True

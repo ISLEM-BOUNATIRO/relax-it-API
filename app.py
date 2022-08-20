@@ -1,6 +1,7 @@
 from flask import Flask,request,jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import *
+from sqlalchemy import exc
 import os
 from flask_marshmallow import Marshmallow
 from sqlalchemy.orm import relationship
@@ -27,4 +28,5 @@ from group import *
 from office import *
 from enable_ssh_disable_telnet import *
 from update_db import *
+from wilaya import *
 
