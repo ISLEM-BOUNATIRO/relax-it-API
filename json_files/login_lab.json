@@ -1,0 +1,39 @@
+{
+    "data": [
+        {
+            "IP": "10.117.5.253",
+            "EQUIPEMENT": "Routeur",
+            "MODEL": "Cisco 1841",
+            "USERNAME": "admin",
+            "PASSWORD": "admin"
+        },
+        {
+            "IP": "10.117.5.254",
+            "EQUIPEMENT": "Firewall",
+            "MODEL": "Fortinet 50B",
+            "USERNAME": "admin",
+            "PASSWORD": "admin12345"
+        },
+        {
+            "IP": "10.117.5.226",
+            "EQUIPEMENT": "Switch",
+            "MODEL": "Fiberhome S5800",
+            "USERNAME": "admin",
+            "PASSWORD": "12345"
+        },
+        {
+            "IP": "10.117.5.227",
+            "EQUIPEMENT": "Switch",
+            "MODEL": "Cisco CE500",
+            "USERNAME": "admin",
+            "PASSWORD": "admin"
+        },
+        {
+            "IP": "10.117.5.228",
+            "EQUIPEMENT": "Switch",
+            "MODEL": "Cisco SF200",
+            "USERNAME": "cisco",
+            "PASSWORD": "cisco"
+        }
+    ]
+}
