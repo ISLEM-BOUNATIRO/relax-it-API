@@ -1,5 +1,9 @@
 from app import app,jsonify,request
 from model import *
+#FORTICLIENT
+#Username islem.bounatiro
+#Password j2t$vTbq
+# ssh -o KexAlgorithms=diffie-hellman-group1-sha1 -o Ciphers=aes256-cbc admin@10.117.5.253   
 
 @app.route('/api/devices')
 def get_devices():
