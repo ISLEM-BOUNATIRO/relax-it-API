@@ -63,6 +63,6 @@ def login():
     password = request.json['password']
     user=User.query.filter_by(username=username,password=password).first()
     if(user):
-        return jsonify({"ok":"1"})
+        return jsonify({"result":"connected"})
     else:
-        return jsonify({"ok":"0"})
+        return jsonify({"result":"not logged"})
