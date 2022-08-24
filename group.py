@@ -1,7 +1,7 @@
 from app import app,jsonify,request
 from model import *
 
-@app.route('/api/groups')
+@app.route('/api/groups') 
 def get_groups():
     groups = Group.query.all()
     group_schema = GroupSchema(many=True)
