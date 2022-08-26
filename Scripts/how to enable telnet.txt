@@ -1,0 +1,20 @@
+The commands below are from Global Configuration mode.
+enable password islem
+
+f les switch
+GIVE AN IP TO THE SVI VLAN 1 AND START IT UP
+interface vlan 1
+ip address 192.168.1.1 255.255.255.0
+no shut down
+
+f routers 
+conf t
+int f0
+no sh
+ip address dhcp
+
+Line vty 0 15
+Transport input all
+Password islem
+login
+enable password islem

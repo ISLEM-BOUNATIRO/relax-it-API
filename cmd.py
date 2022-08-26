@@ -22,9 +22,3 @@ def reverse(web_socket) :
         result=tn.read_all().decode('ascii')
         web_socket.send(result)
     tn.write("exit\n".encode('ascii'))   
-
-
-
-    
-
-

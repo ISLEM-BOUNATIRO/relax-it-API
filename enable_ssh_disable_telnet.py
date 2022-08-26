@@ -33,15 +33,12 @@ def disable_telnet(host,username,password,netmiko_device_type):
     }
 
     net_connect = ConnectHandler(**myrouter)
-
     config_commands = ftl("DISABLE_TELNET")
     output = net_connect.send_config_set(config_commands)
-    print(output)
 
-def ssh_is_enabled(HOST,user,password):
+
+def ssh_is_enabled(HOST,password):
     tn = telnetlib.Telnet(HOST)
-    tn.read_until(b"Username: ")
-    tn.write(user.encode('ascii') + b"\n")
     tn.read_until(b"Password: ")
     tn.write(password.encode('ascii') + b"\n")
     tn.write("enable\n".encode('ascii'))   
@@ -60,48 +57,63 @@ def ssh_is_enabled(HOST,user,password):
 
 def enable_ssh(HOST,user,password):
     tn = telnetlib.Telnet(HOST)
-    tn.read_until(b"Username: ")
-    tn.write(user.encode('ascii') + b"\n")
     tn.read_until(b"Password: ")
     tn.write(password.encode('ascii') + b"\n")
     tn.write("enable\n".encode('ascii'))   
     tn.write((password+"\n").encode('ascii'))
-    
+
     commands = ftl("ENABLE_SSH")
     for i in range(len(commands)):
         c = str(commands[i])+"\n"
         tn.write(c.encode('ascii'))
+        
+    print(123)
     tn.write(b"exit\n")
-    print(tn.read_all().decode('ascii'))
+
 
 @app.route('/api/enable_ssh_disable_telnet',methods=['POST'])
 def enable_ssh_disable_telnet():
     user = password = "islem"
-    host="192.168.217.145"
+    host="192.168.217.144"
     telnet_state =""
     ssh_state="ENABLED"
     #CONNECTION AVEC TELNET POUR ACTIVER SSH
+
     try:
-        enabled=ssh_is_enabled(host,user,password)
+        enabled=ssh_is_enabled(host,password)
+        
         if (enabled==False):
+            
             enable_ssh(host,user,password)
             ssh_state="GOT ACTIVATED"
+            print("ssh got activated")
+         
         else:
             ssh_state="WAS ALREADY ACTIVATED"
+            print("WAS ALREADY ACTIVATED")
+            
     except Exception as exception:
         s="No connection could be made because the target machine actively refused it"
         if s in str(exception):
             telnet_state="UNREACHABLE"
+        print("first exception ="+str(exception))
     #CONNECTION AVEC SSH POUR (TRANSPORT INPUT SSH) ONLY
     try:
         all=transport_input_all(host,user,password, 'cisco_ios')
         if(all):
+            print("transport_input_all is true")
             disable_telnet(host,user,password, 'cisco_ios')
             telnet_state=telnet_state+" GOT DISABLED"
+            print("telnet got disabled")
+            
         else:
+            
             telnet_state=telnet_state+" ALREADY DISABLED"
+            print("telnet allready disabled")
+            
     except Exception as exception:
-        ssh_state="UNREACHABLE"
+        ssh_state=ssh_state+",UNREACHABLE"
+        print("second exception ="+str(exception))
     return {"telnet":telnet_state,"ssh":ssh_state}
 
 
