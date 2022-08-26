@@ -12,7 +12,7 @@ def handlemsg(msg):
     while True:
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        print("Current Time =", current_time)
+        
         socketio.send(current_time) 
         time.sleep(1)
     

@@ -6,10 +6,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script> 
         <script>
-        const syncWait = ms => {
-        const end = Date.now() + ms
-        while (Date.now() < end) continue
-        }
         socket = io(); 
         socket.connect('http://127.0.0.1:80'); 
         socket.on('connect', function(){ 
@@ -23,5 +19,4 @@
 
     <body>
         <h1 id="time"></h1>
-
     </body>
