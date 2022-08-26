@@ -1,24 +1,22 @@
-from app import app,jsonify,request
-import os
-from flask_sock import Sock  
-import telnetlib
-sock =Sock(app)
-#FOR TESTING
-#wscat  -c ws://localhost:80/reverse
+from app import app
+from flask_socketio import SocketIO,send, emit
+from flask import render_template
+socketio =SocketIO(app)
 
-@sock.route('/reverse') 
-def reverse(web_socket) : 
-    tn = telnetlib.Telnet("telehack.com 23")
-    while True: 
-        command = web_socket.receive() 
-        if(command=="exit"):
-            web_socket.send("End of process")
-            break
-        text=tn.read_all()
-        if(text):
-            print(text)
-            
-        tn.write((command+"\n").encode('ascii') + b"\n")
-        result=tn.read_all().decode('ascii')
-        web_socket.send(result)
-    tn.write("exit\n".encode('ascii'))   
+from datetime import datetime
+
+import time
+
+@socketio.on('message') 
+def handlemsg(msg): 
+    while True:
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        print("Current Time =", current_time)
+        socketio.send(current_time) 
+        time.sleep(1)
+    
+
+@app.route("/") 
+def main(): 
+    return render_template("main.html")

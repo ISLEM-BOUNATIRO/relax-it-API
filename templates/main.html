@@ -1,0 +1,27 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+    <head> 
+        <meta charset="UTF-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script> 
+        <script>
+        const syncWait = ms => {
+        const end = Date.now() + ms
+        while (Date.now() < end) continue
+        }
+        socket = io(); 
+        socket.connect('http://127.0.0.1:80'); 
+        socket.on('connect', function(){ 
+            socket.send('a'); 
+        }) 
+        socket.on('message', function(msg) { 
+            console.log(msg); 
+            document.getElementById("time").innerHTML = msg;
+        })
+    </script>
+
+    <body>
+        <h1 id="time"></h1>
+
+    </body>
