@@ -11,7 +11,7 @@ db_uri = 'sqlite:///{}'.format(db_path)
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=['*', 'localhost:5173'])
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
