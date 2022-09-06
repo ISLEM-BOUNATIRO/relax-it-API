@@ -6,27 +6,15 @@ from device import *
 import os
 @app.route('/api/get_device_info',methods=['POST'])
 def get_device_info():
-    
     ip=request.json['ip']
     if not reachable(ip): # PINGING THE ADDRESS
         return {"result": "error " +ip+" is unreachable"}
     else:
-        
         device=get_cisco_device_info(ip)
         device_schema = DeviceSchema()
         output = device_schema.dump(device)
         return jsonify(output)
 
-    '''ADDIIIIIIIIIIIIIIIIIIIING LAZEM ROLLBACK 
-    try:
-        add_device(device)
-        result=result+" "+ip+" got added\n"
-    except Exception as e :
-        db.session.rollback()
-        if("UNIQUE constraint failed" in str(e)):
-            result=result+" "+ip+" have already been added,"
-        else:
-            print(e)'''
 def reachable(host_ip:String):
     host_state  = True if os.system("ping -n 2 " + host_ip) is 0 else False
     return host_state

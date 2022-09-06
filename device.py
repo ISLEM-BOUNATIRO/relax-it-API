@@ -34,18 +34,28 @@ def get_devicelist():
 
 @app.route('/api/devices',methods=['POST'])
 def api_add_device():
-    SUCCESS="1"
     device = Device(ip = request.json['ip'],
     type = request.json['type'],
     model = request.json['model'],
     vendor = request.json['vendor'],
     serial_number = request.json['serial_number'],
     firmware_version = request.json['firmware_version'])
-    add_device(device)
-    return {"result":SUCCESS}
+    return add_device(device)
 def add_device(device:Device):
-    db.session.add(device)
-    db.session.commit()
+        result=""
+        try:
+            db.session.add(device)
+            db.session.commit()
+            result="1"
+        except Exception as e :
+            db.session.rollback()
+            if("UNIQUE constraint failed" in str(e)):
+                result=device.ip+" already exists in the database"
+            else:
+                result="an exception has occured"
+                print(e)
+
+        return {"result":result}
     
 @app.route('/api/devices/delete',methods=['POST'])
 def delete_device():

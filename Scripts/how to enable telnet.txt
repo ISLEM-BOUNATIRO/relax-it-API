@@ -9,6 +9,7 @@ no shut down
 
 f routers 
 conf t
+enable password islem
 int f0
 no sh
 ip address dhcp
