@@ -3,44 +3,38 @@ import regex as re
 from app import app,request
 from group import *
 from device import *
-
-
-@app.route('/api/populate',methods=['POST'])
-def populate():
+import os
+@app.route('/api/get_device_info',methods=['POST'])
+def get_device_info():
+    
     ip=request.json['ip']
-    group=request.json['group']
-    group=Group.query.filter_by(name=group).first()
-    if(ip!=""):
-        group=Group(members=ip)
-    result=""
-    if(group):
-        hosts=members_to_list(group.members)
-    # loop all ip addresses in ip_list
-        for ip in hosts:          
-            d=get_device_info(ip)
-            if d is None:
-                result=result+" "+ip+" is unreachable,"
-
-            try:
-                db.session.add(d)
-                db.session.commit() 
-                result=result+" "+ip+" got added\n"
-            except Exception as e :
-                db.session.rollback()
-                if("UNIQUE constraint failed" in str(e)):
-                    result=result+" "+ip+" have already been added,"
-                else:
-                    print(e)
-
+    if not reachable(ip): # PINGING THE ADDRESS
+        return {"result": "error " +ip+" is unreachable"}
     else:
-        return {"error":"group not found"}
-    result=result[:-1]
-    return {"result":result}
+        
+        device=get_cisco_device_info(ip)
+        device_schema = DeviceSchema()
+        output = device_schema.dump(device)
+        return jsonify(output)
 
-def get_device_info(ipsec):
+    '''ADDIIIIIIIIIIIIIIIIIIIING LAZEM ROLLBACK 
+    try:
+        add_device(device)
+        result=result+" "+ip+" got added\n"
+    except Exception as e :
+        db.session.rollback()
+        if("UNIQUE constraint failed" in str(e)):
+            result=result+" "+ip+" have already been added,"
+        else:
+            print(e)'''
+def reachable(host_ip:String):
+    host_state  = True if os.system("ping -n 2 " + host_ip) is 0 else False
+    return host_state
+
+def get_cisco_device_info(ip):
     cisco = {
                 'device_type': 'cisco_ios',
-                'ip': ipsec,
+                'ip': ip,
                 'username': 'islem',  # ssh username
                 'password': 'islem',  # ssh password
             }
@@ -77,7 +71,7 @@ def get_device_info(ipsec):
         model = regex_model.findall(output)
 
 
-        device = Device(ip = ipsec,
+        device = Device(ip = ip,
         firmware_version = version[0],
         model =model[0],
         serial_number = serial[0],
@@ -86,6 +80,6 @@ def get_device_info(ipsec):
         return device
     except Exception as e:
         if("Common causes of this problem are:" in str(e)):
-            print(ipsec+" is unreachable")
+            print(ip+" is unreachable")
         else:
-            print(e+" catched in showversion.py line 84")
+            print(e+" catched in scan.py at the last line")

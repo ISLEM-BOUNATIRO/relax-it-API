@@ -33,7 +33,7 @@ def get_devicelist():
     return jsonify(output)
 
 @app.route('/api/devices',methods=['POST'])
-def add_device():
+def api_add_device():
     SUCCESS="1"
     device = Device(ip = request.json['ip'],
     type = request.json['type'],
@@ -41,10 +41,12 @@ def add_device():
     vendor = request.json['vendor'],
     serial_number = request.json['serial_number'],
     firmware_version = request.json['firmware_version'])
+    add_device(device)
+    return {"result":SUCCESS}
+def add_device(device:Device):
     db.session.add(device)
     db.session.commit()
-    return {"result":SUCCESS}
-
+    
 @app.route('/api/devices/delete',methods=['POST'])
 def delete_device():
     SUCCESS="2"

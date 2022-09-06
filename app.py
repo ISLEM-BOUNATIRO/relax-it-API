@@ -27,6 +27,6 @@ from script import *
 from group import *
 from office import *
 from enable_ssh_disable_telnet import *
-from update_db import *
+from scan import *
 from wilaya import *
 
