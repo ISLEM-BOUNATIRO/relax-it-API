@@ -20,6 +20,7 @@ class Device(db.Model):
     model = db.Column(String)
     serial_number = db.Column(String)
     firmware_version = db.Column(String)
+    hostname = db.Column(String)
     creation_date = db.Column(db.DateTime, nullable=False,default=datetime.utcnow())
 
 
@@ -42,10 +43,12 @@ class User(db.Model):
 class Office(db.Model):
     __tablename__ = 'office'
     id = db.Column(Integer, primary_key=True)
-    name = db.Column(String)
+    name = db.Column(String, nullable=False)
+    office_subnet = db.Column(String, unique=True)
     office_class = db.Column(String)
     postal_code = db.Column(String)
     wilaya = db.Column(String, ForeignKey('wilaya.name'))
+    
 
 class Wilaya(db.Model):
     __tablename__ = 'wilaya'

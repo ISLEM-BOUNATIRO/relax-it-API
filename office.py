@@ -20,6 +20,7 @@ def get_office():
 def add_office():
     SUCCESS="1"
     office = Office(name = request.json['name'],
+    office_subnet= request.json['office_subnet'],
     office_class = request.json['office_class'],
     postal_code = request.json['postal_code'],
     wilaya = request.json['wilaya'],

@@ -1,9 +1,14 @@
+from app import app,request
+from flask_socketio import SocketIO,send, emit
+from flask import render_template
+import asyncio
 from netmiko import ConnectHandler
 import regex as re
-from app import app,request
 from group import *
 from device import *
 import os
+import time
+
 @app.route('/api/get_device_info',methods=['POST'])
 def get_device_info():
     ip=request.json['ip']
@@ -14,6 +19,29 @@ def get_device_info():
         device_schema = DeviceSchema()
         output = device_schema.dump(device)
         return jsonify(output)
+        
+socketio =SocketIO(app,cors_allowed_origins="*")
+@socketio.on('scan_bp') 
+def handlemsg(office_subnet):
+    print('office_subnet: ', office_subnet)
+    asyncio.run(async_handler(office_subnet))
+
+
+async def async_handler(office_subnet):
+    office_subnet=office_subnet[0:len(office_subnet)-2]
+    for num_device in range(145,150):
+        handle_ips_task = asyncio.create_task(scan_device(office_subnet+"."+str(num_device))) 
+    print('kemeeeelt') 
+    await handle_ips_task   
+    
+        
+
+async def scan_device(ip:str):
+    message=ip+": "+str(reachable(ip))
+    socketio.send(message) 
+
+
+
 
 def reachable(host_ip:String):
     host_state  = True if os.system("ping -n 2 " + host_ip) is 0 else False
@@ -57,14 +85,12 @@ def get_cisco_device_info(ip):
         # finding model in output using regular expressions
         regex_model = re.compile(r'[Cc]isco\s(\S+).*memory.')
         model = regex_model.findall(output)
-
-
         device = Device(ip = ip,
         firmware_version = version[0],
         model =model[0],
         serial_number = serial[0],
         type = "router or switch",
-        vendor = "cisco")
+        vendor = "cisco",hostname=hostname[0])
         return device
     except Exception as e:
         if("Common causes of this problem are:" in str(e)):

@@ -36,6 +36,7 @@ def get_devicelist():
 def api_add_device():
     device = Device(ip = request.json['ip'],
     type = request.json['type'],
+    hostname = request.json['hostname'],
     model = request.json['model'],
     vendor = request.json['vendor'],
     serial_number = request.json['serial_number'],
