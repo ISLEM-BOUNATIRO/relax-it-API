@@ -13,7 +13,7 @@ def handlemsg(office_subnet):
     #asyncio.run(async_handler(office_subnet))
     socketio.send("Scanning office  "+str(office_subnet))
     office_subnet=office_subnet[0:len(office_subnet)-1]
-    ip_list=[254,253]
+    ip_list=[254,253,1]
     #1,226,227,228,229,230
     x=scan_office_and_devices()
     x.thread_count = 256

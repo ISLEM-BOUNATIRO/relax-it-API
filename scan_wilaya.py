@@ -69,10 +69,9 @@ class scan_wilaya(object):
             self.progress=int(( current_office/offices_number)*100)
             message ="Scanning offices " +str(self.progress)+' %' 
             scan.socketio.send(message)
-            
             scan.socketio.send("Scanning office  "+str(office_subnet2))
             office_subnet2=office_subnet2[0:len(office_subnet2)-1]
-            ip_list=[254,253]
+            ip_list=[254,253,1]
             #1,226,227,228,229,230
             x=scan.scan_office_and_devices()
             x.rana_f_office=False
