@@ -1,13 +1,11 @@
-from app import app,request
+from app import *
+import device
 from flask_socketio import SocketIO,send, emit
 from flask import render_template
 import asyncio
 from netmiko import ConnectHandler
 import regex as re
-from group import *
-from device import *
 import os
-import time
 import subprocess
 import threading
 socketio =SocketIO(app,cors_allowed_origins="*")
@@ -16,17 +14,18 @@ def handlemsg(office_subnet):
     print('office_subnet: ', office_subnet)
     #asyncio.run(async_handler(office_subnet))
     office_subnet=office_subnet[0:len(office_subnet)-1]
-    ip_list=[254,253,1,226,227,228,229,230,146,147,128]
-    x=rscan()
+    ip_list=[254,253]
+    #1,226,227,228,229,230
+    x=scan_all_devices()
     x.thread_count = 8
-    x.rng(ip_list,office_subnet)
+    x.init_ip_list(ip_list,office_subnet)
     x.start()
 @socketio.on('disconnect') 
 def handledisco():
     print('SOCKET CLOSED')
     
 
-class rscan(object):
+class scan_all_devices(object):
     state = {'online': [], 'offline': []} # Dictionary with list
     ips = [] # Should be filled by function after taking range
     # Amount of pings at the time
@@ -35,43 +34,48 @@ class rscan(object):
     lock = threading.Lock()
     # Using Windows ping command
     def ping(self, ip):
-        #answer = subprocess.call(['ping','-n','4',ip],stdout = subprocess.DEVNULL)
         p = subprocess.Popen('ping -n 2 '+ip,stdout = subprocess.DEVNULL)
         p.wait()
-        rslt=(p.poll()==0)
-        print (ip+":  "+str(rslt))
-        return rslt 
-    def pop_queue(self):
+        result=(p.poll()==0)
+        print (ip+":  "+str(result))
+        return result 
+    def pop_ip_from_list(self):
         ip = None
         self.lock.acquire() # lock !!!
         if self.ips:
             ip = self.ips.pop()
-
         self.lock.release()
         return ip
-    def noqueue(self):
+
+    def scan_add_devices(self):
         while True:
-            ip = self.pop_queue()
+            ip = self.pop_ip_from_list()
             if not ip:
                 return None
             result = 'online' if self.ping(ip) else 'offline'
             message=ip+": "+result
             socketio.send(message) 
-            self.state[result].append(ip) ### check again
+            result=device.add_device(get_cisco_device_info(ip))["result"]
+            if (result=="1"):
+                message=ip+" was added to database"
+            else:
+                message="error" + result
+            socketio.send(message) 
+
+            #self.state[result].append(ip) ### check again
 
 
     def start(self):
         threads = []
         for i in range(self.thread_count):
-            t = threading.Thread(target=self.noqueue)
+            t = threading.Thread(target=self.scan_add_devices)
             t.start()
             threads.append(t)
         # Wait for all threads
         [ t.join() for t in threads ]
+        socketio.send("Operation Finished")
         return self.state
-    def rng(self, ip_list, ip3):
-        
-
+    def init_ip_list(self, ip_list, ip3):
         self.ip3 = ip3
         for i in ip_list:
             ip = ip3 + str(i)
@@ -95,7 +99,7 @@ async def scan_device(ip:str):
     socketio.send(message) 
 
 
-def reachable(host_ip:String):
+def reachable(host_ip):
     host_state  = True if os.system("ping -n 2 " + host_ip) is 0 else False
     return host_state
 
