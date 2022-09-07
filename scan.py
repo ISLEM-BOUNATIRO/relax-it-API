@@ -11,8 +11,8 @@ import threading
 socketio =SocketIO(app,cors_allowed_origins="*")
 @socketio.on('scan_bp') 
 def handlemsg(office_subnet):
-    print('office_subnet: ', office_subnet)
     #asyncio.run(async_handler(office_subnet))
+    socketio.send("Scanning office  "+str(office_subnet))
     office_subnet=office_subnet[0:len(office_subnet)-1]
     ip_list=[254,253]
     #1,226,227,228,229,230
@@ -23,6 +23,11 @@ def handlemsg(office_subnet):
 @socketio.on('disconnect') 
 def handledisco():
     print('SOCKET CLOSED')
+
+@socketio.on('scan_wilaya') 
+def handledisco(wilaya_number):
+    socketio.send("Scanning wilaya number "+str(wilaya_number))
+    
     
 
 class scan_all_devices(object):
