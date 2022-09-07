@@ -10,19 +10,29 @@ import os
 import time
 import subprocess
 import threading
-
+socketio =SocketIO(app,cors_allowed_origins="*")
+@socketio.on('scan_bp') 
+def handlemsg(office_subnet):
+    print('office_subnet: ', office_subnet)
+    #asyncio.run(async_handler(office_subnet))
+    office_subnet=office_subnet[0:len(office_subnet)-1]
+    ip_list=[254,253,1,226,227,228,229,230,146,147,128]
+    x=rscan()
+    x.thread_count = 8
+    x.rng(ip_list,office_subnet)
+    x.start()
+@socketio.on('disconnect') 
+def handledisco():
+    print('SOCKET CLOSED')
+    
 
 class rscan(object):
-
     state = {'online': [], 'offline': []} # Dictionary with list
     ips = [] # Should be filled by function after taking range
-
     # Amount of pings at the time
     thread_count = 8
-
     # Lock object to prevent race conditions
     lock = threading.Lock()
-
     # Using Windows ping command
     def ping(self, ip):
         #answer = subprocess.call(['ping','-n','4',ip],stdout = subprocess.DEVNULL)
@@ -30,10 +40,7 @@ class rscan(object):
         p.wait()
         rslt=(p.poll()==0)
         print (ip+":  "+str(rslt))
-
         return rslt 
-
-
     def pop_queue(self):
         ip = None
         self.lock.acquire() # lock !!!
@@ -42,8 +49,6 @@ class rscan(object):
 
         self.lock.release()
         return ip
-
-
     def noqueue(self):
         while True:
             ip = self.pop_queue()
@@ -64,44 +69,17 @@ class rscan(object):
         # Wait for all threads
         [ t.join() for t in threads ]
         return self.state
+    def rng(self, ip_list, ip3):
+        
 
-    def rng(self, frm, to, ip3):
-        pingable=[254,253,1,226,227,228,229,230,146,147,128]
-        self.frm = frm
-        self.to = to
         self.ip3 = ip3
-        for i in pingable:
+        for i in ip_list:
             ip = ip3 + str(i)
             self.ips.append(ip)
 
 
-@app.route('/api/get_device_info',methods=['POST'])
-def get_device_info():
-    ip=request.json['ip']
-    if not reachable(ip): # PINGING THE ADDRESS
-        return {"result": "error " +ip+" is unreachable"}
-    else:
-        device=get_cisco_device_info(ip)
-        device_schema = DeviceSchema()
-        output = device_schema.dump(device)
-        return jsonify(output)
-        
 
 
-socketio =SocketIO(app,cors_allowed_origins="*")
-@socketio.on('scan_bp') 
-def handlemsg(office_subnet):
-    print('office_subnet: ', office_subnet)
-    #asyncio.run(async_handler(office_subnet))
-    office_subnet=office_subnet[0:len(office_subnet)-1]
-    x=rscan()
-    x.thread_count = 8
-    x.rng(1,256,office_subnet)
-    x.start()
-@socketio.on('disconnect') 
-def handledisco():
-    print('SOCKET CLOSED')
-    socketio.close()
     
     
 
