@@ -52,14 +52,14 @@ class scan_all_devices(object):
             ip = self.pop_ip_from_list()
             if not ip:
                 return None
-            result = 'online' if self.ping(ip) else 'offline'
-            message=ip+": "+result
+            result = 'pingable' if self.ping(ip) else 'offline'
+            message=ip+" is "+result
             socketio.send(message) 
             result=device.add_device(get_cisco_device_info(ip))["result"]
             if (result=="1"):
                 message=ip+" was added to database"
             else:
-                message="error" + result
+                message= result
             socketio.send(message) 
 
             #self.state[result].append(ip) ### check again
