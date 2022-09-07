@@ -10,10 +10,14 @@ class scan_wilaya(object):
     thread_count = 256
     lock = threading.Lock()
     def ping(self, ip):
-        p = subprocess.Popen('ping -n 2 '+ip,stdout = subprocess.DEVNULL)
+        output=""
+        p = subprocess.Popen('ping -n 2 '+ip,stdout=subprocess.PIPE)
+        output = p.stdout.read()
         p.wait()
-        result=(p.poll()==0)
+        #result=(p.poll()==0) 
+        result="Approximate round trip" in str(output)
         return result 
+
 
     def pop_ip_from_list(self):
         ip = None

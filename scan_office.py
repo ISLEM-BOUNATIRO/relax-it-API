@@ -12,8 +12,6 @@ class scan_office_and_devices(object):
         output=""
         p = subprocess.Popen('ping -n 2 '+ip,stdout=subprocess.PIPE)
         output = p.stdout.read()
-        print(output)
-        print("Approximate round trip" in str(output))
         p.wait()
         #result=(p.poll()==0) 
         result="Approximate round trip" in str(output)
