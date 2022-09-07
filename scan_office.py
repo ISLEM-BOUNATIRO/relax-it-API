@@ -9,9 +9,14 @@ class scan_office_and_devices(object):
     thread_count = 256
     lock = threading.Lock()
     def ping(self, ip):
-        p = subprocess.Popen('ping -n 2 '+ip,stdout = subprocess.DEVNULL)
+        output=""
+        p = subprocess.Popen('ping -n 2 '+ip,stdout=subprocess.PIPE)
+        output = p.stdout.read()
+        print(output)
+        print("Approximate round trip" in str(output))
         p.wait()
-        result=(p.poll()==0)
+        #result=(p.poll()==0) 
+        result="Approximate round trip" in str(output)
         return result 
     def pop_ip_from_list(self):
         ip = None
@@ -30,18 +35,22 @@ class scan_office_and_devices(object):
             if not ip:
                 return None
             pingable =self.ping(ip)
+
             if(pingable):
                 message=ip+" is pingable"
                 scan.socketio.send(message) 
+                
                 d=scan.get_cisco_device_info(ip)
-                result=device.add_device(d)["result"]
-                if (result=="1"):
-                    message=ip+" was added to database"
-                    scan.socketio.send(message)
-                else:
-                    message= result
-                    scan.socketio.send(message) 
                 if(d!=-1):
+                    result=device.add_device(d)["result"]
+                    if (result=="1"):
+                        message=ip+" was added to database"
+                        scan.socketio.send(message)
+                    else:
+                        message= result
+                        scan.socketio.send(message) 
+               
+                
                     off = office.Office(office_subnet= ip,name= d.hostname)
                     fourth_byte=ip.split('.')[3]
                 
@@ -51,6 +60,9 @@ class scan_office_and_devices(object):
                         result_office=office.add_office(off)
                         if(result_office["result"]=="1"):
                             scan.socketio.send("Office "+str(off.name)+" added to database")
+                else:
+                    message="attention "+ip+" is pingable but not reachable"
+                    scan.socketio.send(message)
             self.number=self.number+1
             self.progress=int(( self.number/self.number_of_ips)*100)
             message ="Scanning office " +str(self.progress)+' %' 
@@ -66,7 +78,8 @@ class scan_office_and_devices(object):
             threads.append(t)
         # Wait for all threads
         [ t.join() for t in threads ]
-        scan.socketio.send("Operation Finished")
+        if(self.rana_f_office):
+            scan.socketio.send("Operation Finished")
         return self
     def init_ip_list(self, ip_list, ip3):
         self.ip3 = ip3
