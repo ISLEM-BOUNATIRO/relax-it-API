@@ -98,6 +98,12 @@ def handlemsg(office_subnet):
     x.thread_count = 8
     x.rng(1,256,office_subnet)
     x.start()
+@socketio.on('disconnect') 
+def handledisco():
+    print('SOCKET CLOSED')
+    socketio.close()
+    
+    
 
 
 async def async_handler(office_subnet):
