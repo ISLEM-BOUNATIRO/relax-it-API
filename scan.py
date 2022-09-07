@@ -26,12 +26,12 @@ class rscan(object):
     # Using Windows ping command
     def ping(self, ip):
         #answer = subprocess.call(['ping','-n','4',ip],stdout = subprocess.DEVNULL)
-        p = subprocess.Popen('ping -n 1 '+ip,stdout = subprocess.DEVNULL)
+        p = subprocess.Popen('ping -n 2 '+ip,stdout = subprocess.DEVNULL)
         p.wait()
         rslt=(p.poll()==0)
         print (ip+":  "+str(rslt))
 
-        return rslt and ip
+        return rslt 
 
 
     def pop_queue(self):
