@@ -6,7 +6,7 @@ import asyncio
 from netmiko import ConnectHandler
 import regex as re
 import os
-
+import scan_wilaya as sw
 socketio =SocketIO(app,cors_allowed_origins="*")
 @socketio.on('scan_bp') 
 def handlemsg(office_subnet):
@@ -25,12 +25,17 @@ def handledisco():
 
 @socketio.on('scan_wilaya') 
 def handledisco(wilaya_number):
-    socketio.send("Scanning wilaya number "+str(wilaya_number))
-    office_subnet_list=[]
+    socketio.send("Pinging offices of wilaya number "+str(wilaya_number))
+    office_subnet_three_bytes=[]
     second_byte=int(wilaya_number)+64
-    for third_byte in range(1,256):
-        office_subnet_list.append("192."+str(second_byte)+"."+str(third_byte)+".0")
-        print(office_subnet_list[third_byte-1])
+    for third_byte in range(210,220):#ATTENTIOOOOON
+        office_subnet_three_bytes.append("192."+str(second_byte)+"."+str(third_byte)+".")
+        print(office_subnet_three_bytes[third_byte-211])
+    
+    x=sw.scan_wilaya()
+    x.thread_count = 8
+    x.ips=office_subnet_three_bytes
+    x.start()
     
     
 

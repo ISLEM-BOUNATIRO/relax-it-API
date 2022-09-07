@@ -4,7 +4,7 @@ import device
 import office
 import scan 
 class scan_office_and_devices(object):
-    we_are_scanning_wilaya=True
+
     ips = [] 
     thread_count = 8
     lock = threading.Lock()
