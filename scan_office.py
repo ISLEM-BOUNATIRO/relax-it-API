@@ -77,8 +77,6 @@ class scan_office_and_devices(object):
         [ t.join() for t in threads ]
         if(self.rana_f_office):
             scan.socketio.send("Operation Finished")
-        message ="Scanning offices 100 %" 
-        scan.socketio.send(message)  
         return self
     def init_ip_list(self, ip_list, ip3):
         self.ip3 = ip3
