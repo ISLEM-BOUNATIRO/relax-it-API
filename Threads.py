@@ -1,3 +1,4 @@
+import subprocess
 import threading
 import time
 
@@ -16,14 +17,29 @@ def func3(a,b,c):
         print(f"fonction 3: args=( {a},{b},{c} ) percentage:"+str((i+1)*10)+"%")
         time.sleep(1)
 
+
+def func4(a,b):
+    p = subprocess.Popen('ping -n 2 10.10.10.10',stdout = subprocess.DEVNULL)
+    p.wait()
+    result=(p.poll()==0)
+    print (f"fonction : args=( {a},{b} ) result:  "+str(result))
+   
+
 def start_threads(function_list,args_list):
     threads = []
-    for i in range(len(function_list)):
-        threads.append(threading.Thread(target=function_list[i], args=args_list[i]))
+    rng=256
+    for i in range(rng):
+        threads.append(threading.Thread(target=function_list[3], args=[i,i]))
         threads[i].start()
+    for i in range(rng):
+        threads[i].join()
 
 #MAIN PROGRAM
-function_list=[func1,func2,func3]
+start_time = time.time()
+
+
+function_list=[func1,func2,func3,func4]
 args_list=[[1,2],[],[4,5,6]]
 start_threads(function_list,args_list)
 
+print("--- %s seconds ---" % (time.time() - start_time))

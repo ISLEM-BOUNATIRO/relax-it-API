@@ -16,7 +16,7 @@ def handlemsg(office_subnet):
     ip_list=[254,253]
     #1,226,227,228,229,230
     x=scan_office_and_devices()
-    x.thread_count = 8
+    x.thread_count = 256
     x.init_ip_list(ip_list,office_subnet)
     x.start()
 @socketio.on('disconnect') 
@@ -30,10 +30,10 @@ def handledisco(wilaya_number):
     second_byte=int(wilaya_number)+64
     for third_byte in range(210,220):#ATTENTIOOOOON
         office_subnet_three_bytes.append("192."+str(second_byte)+"."+str(third_byte)+".")
-        print(office_subnet_three_bytes[third_byte-211])
+        #print(office_subnet_three_bytes[third_byte-1])
     
     x=sw.scan_wilaya()
-    x.thread_count = 8
+    x.thread_count = 256
     x.ips=office_subnet_three_bytes
     x.start()
     
@@ -108,5 +108,7 @@ def get_cisco_device_info(ip):
     except Exception as e:
         if("Common causes of this problem are:" in str(e)):
             print(ip+" is unreachable")
+            return -1
         else:
-            print(e+" catched in scan.py at the last line")
+            print(e+"\n\n\n\n catched in scan.py at the last line")
+            return -1
