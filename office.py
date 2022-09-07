@@ -17,7 +17,7 @@ def get_office():
     return jsonify(output)
 
 @app.route('/api/offices',methods=['POST'])
-def add_office():
+def add_office_api():
     SUCCESS="1"
     office = Office(name = request.json['name'],
     office_subnet= request.json['office_subnet'],
@@ -25,9 +25,23 @@ def add_office():
     postal_code = request.json['postal_code'],
     wilaya = request.json['wilaya'],
     )
-    db.session.add(office)
+    add_office(office)
     db.session.commit()
     return {"result":SUCCESS}
+def add_office(office):
+    result=""
+    try:
+        db.session.add(office)
+        db.session.commit()
+        result="1"
+    except Exception as e :
+        db.session.rollback()
+        if("UNIQUE constraint failed" in str(e)):
+            result=office.office_subnet+" already exists in the database"
+        else:
+            result="an exception has occured"
+            print(e)
+    return {"result":result}    
 
 
 @app.route('/api/offices/delete',methods=['POST'])

@@ -1,5 +1,6 @@
 from app import *
 import device
+import office
 from flask_socketio import SocketIO,send, emit
 from flask import render_template
 import asyncio
@@ -60,13 +61,25 @@ class scan_all_devices(object):
             result = 'pingable' if self.ping(ip) else 'offline'
             message=ip+" is "+result
             socketio.send(message) 
-            result=device.add_device(get_cisco_device_info(ip))["result"]
+            d=get_cisco_device_info(ip)
+            result=device.add_device(d)["result"]
             if (result=="1"):
                 message=ip+" was added to database"
             else:
                 message= result
             socketio.send(message) 
 
+            off = office.Office(office_subnet= ip,name= d.hostname)
+            fourth_byte=ip.split('.')[3]
+            
+            a=(fourth_byte=="254")
+            b=(fourth_byte=="1")
+            if a | b:
+                result_office=office.add_office(off)
+                print(result_office["result"])
+                if(result_office["result"]=="1"):
+                    print("office got added")
+                    socketio.send("Office "+str(off.name)+" added to database")
             #self.state[result].append(ip) ### check again
 
 
