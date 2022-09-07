@@ -17,7 +17,7 @@ class scan_office_and_devices(object):
         ip = None
         self.lock.acquire() # lock !!!
         if self.ips:
-            ip = self.ips.pop()
+            ip = self.ips.pop(0)
         self.lock.release()
         return ip
     progress=0

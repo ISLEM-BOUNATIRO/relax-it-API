@@ -28,7 +28,7 @@ def handledisco(wilaya_number):
     socketio.send("Pinging offices of wilaya number "+str(wilaya_number))
     office_subnet_three_bytes=[]
     second_byte=int(wilaya_number)+64
-    for third_byte in range(210,220):#ATTENTIOOOOON
+    for third_byte in range(1,256):#ATTENTIOOOOON
         office_subnet_three_bytes.append("192."+str(second_byte)+"."+str(third_byte)+".")
         #print(office_subnet_three_bytes[third_byte-1])
     
