@@ -7,13 +7,14 @@ from netmiko import ConnectHandler
 import regex as re
 import os
 import scan_wilaya as sw
+import telnetlib
 socketio =SocketIO(app,cors_allowed_origins="*")
 @socketio.on('scan_bp') 
 def handlemsg(office_subnet):
     #asyncio.run(async_handler(office_subnet))
     socketio.send("Scanning office  "+str(office_subnet))
     office_subnet=office_subnet[0:len(office_subnet)-1]
-    ip_list=[254,253,1]
+    ip_list=[254,253,1,226,227,228,229,230]
     #1,226,227,228,229,230
     x=scan_office_and_devices()
     x.thread_count = 256
@@ -60,18 +61,23 @@ def reachable(host_ip):
     host_state  = True if os.system("ping -n 2 " + host_ip) is 0 else False
     return host_state
 def get_device_type(ip):
+    lista=["226","227","228","229","230"]
     fourth_byte=ip.split('.')[3]
     if (fourth_byte=="253" or fourth_byte=="1"):
         return "Router"
     if (fourth_byte=="254"):
         return "Firewall"
-    return "Switch"
-def get_cisco_device_info(ip):
+    if (fourth_byte in lista):
+        return "Switch"
+    return ""
+
+
+def get_cisco_device_info(ip,username,password):
     cisco = {
                 'device_type': 'cisco_ios',
                 'ip': ip,
-                'username': 'islem',  # ssh username
-                'password': 'islem',  # ssh password
+                'username': username,  # ssh username
+                'password': password,  # ssh password
             }
     try:
         net_connect = ConnectHandler(**cisco)
@@ -155,6 +161,48 @@ def get_fortinet_info(ip):
         serial_number = serial[0],
         type = "Firewall",
         vendor = "Fortinet",hostname=hostname[0])
+        return device
+    except Exception as e:
+        if("Common causes of this problem are:" in str(e)):
+            print(ip+" is unreachable")
+            return -1
+        else:
+            print(e+"\n\n\n\n catched in scan.py at the last line")
+            return -1
+def show_version_fiberhome_telnet(ip,username,password):
+    tn = telnetlib.Telnet(ip)
+    tn.read_until(b"Username: ")
+    tn.write(username.encode('ascii') + b"\n")
+    tn.read_until(b"Password: ")
+    tn.write(password.encode('ascii') + b"\n")
+    tn.write(b"show version\n")
+    ret=tn.read_until(b"System Memory").decode('ascii')
+    tn.write(b"exit\n")
+    return str(ret)
+
+def get_fiberhome_info(ip,username,password):
+    try:
+        output = show_version_fiberhome_telnet(ip,username,password)
+        # version 
+        regex_version = re.compile(r'\s\sUSP\s\(R\)\sSoftware\sVersion\s(.+)')
+        version = regex_version.findall(output)
+        version[0].replace('\r',' ')
+        # serial
+        regex_serial = re.compile(r'\s\sSerial\sNumber\s\s\s\s:\s(\S+)')
+        serial = regex_serial.findall(output)
+        #model
+        regex_model = re.compile(r'FiberHome\s(.+)')
+        model = regex_model.findall(output)
+        # hostname TODOOOOOOOOOOOOO
+        # regex_hostname = re.compile(r'Hostname:\s(\S+)')
+        # hostname = regex_hostname.findall(output)
+        # FIND EQUIVALENT sh run | in hostname FOR FIBERHOME
+        device = Device(ip = ip,
+        firmware_version = version[0].rstrip(),
+        model =model[2].rstrip(),
+        serial_number = serial[0].rstrip(),
+        type = "Switch",
+        vendor = "Fiberhome",hostname="TO DO")
         return device
     except Exception as e:
         if("Common causes of this problem are:" in str(e)):

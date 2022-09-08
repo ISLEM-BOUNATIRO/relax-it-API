@@ -8,10 +8,13 @@ from scan import reachable,get_cisco_device_info
 @app.route('/api/get_device_info',methods=['POST'])
 def get_device_info():
     ip=request.json['ip']
+    username=request.json['username']
+    password=request.json['password']
+    ip=request.json['ip']
     if not reachable(ip): # PINGING THE ADDRESS
         return {"result": "error " +ip+" is unreachable"}
     else:
-        device=get_cisco_device_info(ip)
+        device=get_cisco_device_info(ip,username,password)
         device_schema = DeviceSchema()
         output = device_schema.dump(device)
         return jsonify(output)

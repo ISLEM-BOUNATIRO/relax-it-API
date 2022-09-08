@@ -74,7 +74,7 @@ class scan_wilaya(object):
             scan.socketio.send("Scanning office  "+str(office_subnet2))
             
             office_subnet2=office_subnet2[0:len(office_subnet2)-1]
-            ip_list=[254,253,1]
+            ip_list=[254,253,1,226,227,228,229,230]
             #1,226,227,228,229,230
             x=scan.scan_office_and_devices()
             x.last_office=(office_subnet2+"0"==self.pingable_offices[len(self.pingable_offices)-1])

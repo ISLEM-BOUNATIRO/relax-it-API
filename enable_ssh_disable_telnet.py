@@ -73,8 +73,13 @@ def enable_ssh(HOST,user,password):
         tn.write(c.encode('ascii'))
     tn.write(b"exit\n")
     tn.read_all().decode('ascii')
+    return tn.read_all().decode('ascii')
      
 
+@app.route('/api/enable_ssh',methods=['POST'])
+def enable_ssh_api():
+    ip = request.json['ip']
+    return {"result":enable_ssh(ip,"admin","12345")}
 
 @app.route('/api/enable_ssh_disable_telnet',methods=['POST'])
 def enable_ssh_disable_telnet_api():

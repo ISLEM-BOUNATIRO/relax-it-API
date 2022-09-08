@@ -42,7 +42,14 @@ class scan_office_and_devices(object):
                 if(scan.get_device_type(ip)=="Firewall"):
                     d=scan.get_fortinet_info(ip)
                 elif(scan.get_device_type(ip)=="Router"):
-                    d=scan.get_cisco_device_info(ip)
+                    d=scan.get_cisco_device_info(ip,"admin","admin")
+                elif(scan.get_device_type(ip)=="Switch"):
+                    #LOOP OVER ALL USERNAMES UNTIL U GET THE RIGHT ONE
+                    #d=scan.get_cisco_device_info(ip,"admin","admin")
+                    #GET_SWITCH_VENDOR()
+                    #d=scan.get_cisco_device_info(ip,"cisco","cisco")
+                    #for now 3ndna ghir fiberhome
+                    d=scan.get_fiberhome_info("10.117.5.226","admin","12345")
 
                 if(d!=-1):
                     result=device.add_device(d)["result"]
