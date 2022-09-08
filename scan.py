@@ -59,7 +59,13 @@ async def scan_device(ip:str):
 def reachable(host_ip):
     host_state  = True if os.system("ping -n 2 " + host_ip) is 0 else False
     return host_state
-
+def get_device_type(ip):
+    fourth_byte=ip.split('.')[3]
+    if (fourth_byte=="253" or fourth_byte=="1"):
+        return "Router"
+    if (fourth_byte=="254"):
+        return "Firewall"
+    return "Switch"
 def get_cisco_device_info(ip):
     cisco = {
                 'device_type': 'cisco_ios',
@@ -102,8 +108,8 @@ def get_cisco_device_info(ip):
         firmware_version = version[0],
         model =model[0],
         serial_number = serial[0],
-        type = "router or switch",
-        vendor = "cisco",hostname=hostname[0])
+        type = get_device_type(ip),
+        vendor = "Cisco",hostname=hostname[0])
         return device
     except Exception as e:
         if("Common causes of this problem are:" in str(e)):
@@ -112,3 +118,50 @@ def get_cisco_device_info(ip):
         else:
             print(e+"\n\n\n\n catched in scan.py at the last line")
             return -1
+
+def get_fortinet_info(ip):
+    #GOOGLE REGEX GENERATOR
+    fortinet = {
+                'device_type': 'fortinet',
+                'ip': ip,
+                'username': 'admin',  # ssh username
+                'password': 'admin12345',  # ssh password
+            }
+
+    try:
+        net_connect = ConnectHandler(**fortinet)
+        # execute show version on router and save output to output object
+        output = net_connect.send_command('get system status')
+        net_connect.disconnect()
+        # finding hostname in output using regular expressions
+        # hostname
+        regex_hostname = re.compile(r'Hostname:\s(\S+)')
+        hostname = regex_hostname.findall(output)
+        # version 
+        regex_version = re.compile(r'Version:\s(.+)')
+        version = regex_version.findall(output)
+        # serial
+        regex_serial = re.compile(r'Serial-Number:\s(\S+)')
+        serial = regex_serial.findall(output)
+        #ios image
+        regex_ios = re.compile(r'Serial-Number:\s(\S+)')
+        ios = regex_ios.findall(output)
+        #model
+        regex_model = re.compile(r'Version:\s(\S+)')
+        model = regex_model.findall(output)
+        device = Device(ip = ip,
+        firmware_version = version[0],
+        model =model[0],
+        serial_number = serial[0],
+        type = "Firewall",
+        vendor = "Fortinet",hostname=hostname[0])
+        return device
+    except Exception as e:
+        if("Common causes of this problem are:" in str(e)):
+            print(ip+" is unreachable")
+            return -1
+        else:
+            print(e+"\n\n\n\n catched in scan.py at the last line")
+            return -1
+
+

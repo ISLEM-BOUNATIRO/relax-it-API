@@ -1,8 +1,8 @@
 enable
-islem
+admin
 conf t
-username islem pass islem
-username islem priv 15
+username admin pass admin
+username admin priv 15
 line vty 0 4
 login local
 transport input all

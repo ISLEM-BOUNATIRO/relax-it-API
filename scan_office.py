@@ -38,8 +38,12 @@ class scan_office_and_devices(object):
             if(pingable):
                 message=ip+" is pingable"
                 scan.socketio.send(message) 
-                
-                d=scan.get_cisco_device_info(ip)
+                d=-1
+                if(scan.get_device_type(ip)=="Firewall"):
+                    d=scan.get_fortinet_info(ip)
+                elif(scan.get_device_type(ip)=="Router"):
+                    d=scan.get_cisco_device_info(ip)
+
                 if(d!=-1):
                     result=device.add_device(d)["result"]
                     if (result=="1"):
