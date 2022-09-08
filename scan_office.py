@@ -49,8 +49,9 @@ class scan_office_and_devices(object):
                     #GET_SWITCH_VENDOR()
                     #d=scan.get_cisco_device_info(ip,"cisco","cisco")
                     #for now 3ndna ghir fiberhome
-                    d=scan.get_fiberhome_info("10.117.5.226","admin","12345")
-
+                    if(ip=="10.117.5.226"):
+                        d=scan.get_fiberhome_info(ip,"admin","12345")
+                    
                 if(d!=-1):
                     result=device.add_device(d)["result"]
                     if (result=="1"):
