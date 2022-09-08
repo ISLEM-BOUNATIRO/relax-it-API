@@ -180,8 +180,23 @@ def show_version_fiberhome_telnet(ip,username,password):
     tn.write(b"exit\n")
     return str(ret)
 
+def hostname_fiberhome_telnet(ip,username,password):
+    tn = telnetlib.Telnet(ip)
+    tn.read_until(b"Username: ")
+    tn.write(username.encode('ascii') + b"\n")
+    tn.read_until(b"Password: ")
+    tn.write(password.encode('ascii') + b"\n")
+    tn.write(b"show run include substring hostname\n")
+    ret=tn.read_until(b"!end").decode('ascii')
+    tn.write(b"exit\n")
+    return str(ret)
+
 def get_fiberhome_info(ip,username,password):
     try:
+        host_show_run_output=hostname_fiberhome_telnet(ip,username,password)
+        regex_hostname = re.compile(r'\shostname\s(\S+)')
+        hostname = regex_hostname.findall(host_show_run_output)
+        
         output = show_version_fiberhome_telnet(ip,username,password)
         # version 
         regex_version = re.compile(r'\s\sUSP\s\(R\)\sSoftware\sVersion\s(.+)')
@@ -202,7 +217,7 @@ def get_fiberhome_info(ip,username,password):
         model =model[2].rstrip(),
         serial_number = serial[0].rstrip(),
         type = "Switch",
-        vendor = "Fiberhome",hostname="TO DO")
+        vendor = "Fiberhome",hostname=hostname[0])
         return device
     except Exception as e:
         if("Common causes of this problem are:" in str(e)):
