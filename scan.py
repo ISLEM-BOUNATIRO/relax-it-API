@@ -29,7 +29,7 @@ def handledisco(wilaya_number):
     office_subnet_three_bytes=[]
     second_byte=int(wilaya_number)+64
     for third_byte in range(1,256):#ATTENTIOOOOON
-        office_subnet_three_bytes.append("192."+str(second_byte)+"."+str(third_byte)+".")
+        office_subnet_three_bytes.append("10."+str(second_byte)+"."+str(third_byte)+".")
         #print(office_subnet_three_bytes[third_byte-1])
     
     x=sw.scan_wilaya()

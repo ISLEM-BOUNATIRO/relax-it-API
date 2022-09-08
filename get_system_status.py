@@ -2,9 +2,9 @@ from netmiko import ConnectHandler
 
 myFirewall = {
     'device_type': 'fortinet',
-    'ip': '192.168.217.136',
+    'ip': '10.117.5.254',
     'username': 'admin',
-    'password': 'islem',
+    'password': 'admin12345',
 }
 
 net_connect = ConnectHandler(**myFirewall)
