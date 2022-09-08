@@ -67,13 +67,17 @@ class scan_wilaya(object):
         for office_subnet2 in self.pingable_offices:
             current_office=current_office+1
             self.progress=int(( current_office/offices_number)*100)
-            message ="Scanning offices " +str(self.progress)+' %' 
-            scan.socketio.send(message)
+            
+            if(self.progress!=100):
+                message ="Scanning offices " +str(self.progress)+' %' 
+                scan.socketio.send(message)
             scan.socketio.send("Scanning office  "+str(office_subnet2))
+            
             office_subnet2=office_subnet2[0:len(office_subnet2)-1]
             ip_list=[254,253,1]
             #1,226,227,228,229,230
             x=scan.scan_office_and_devices()
+            x.last_office=(office_subnet2+"0"==self.pingable_offices[len(self.pingable_offices)-1])
             x.rana_f_office=False
             x.thread_count = 256
             x.init_ip_list(ip_list,office_subnet2)

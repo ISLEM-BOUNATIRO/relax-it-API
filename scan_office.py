@@ -4,6 +4,7 @@ import device
 import office
 import scan 
 class scan_office_and_devices(object):
+    last_office=False
     rana_f_office=True
     ips = [] 
     thread_count = 256
@@ -63,7 +64,7 @@ class scan_office_and_devices(object):
                     scan.socketio.send(message)
             self.number=self.number+1
             self.progress=int(( self.number/self.number_of_ips)*100)
-            message ="Scanning office " +str(self.progress)+' %' 
+            message ="Scanning office " +str(self.progress)+" %" 
             if(self.rana_f_office):
                 scan.socketio.send(message)                
 
@@ -76,6 +77,9 @@ class scan_office_and_devices(object):
         # Wait for all threads
         [ t.join() for t in threads ]
         if(self.rana_f_office):
+            scan.socketio.send("Operation Finished")
+        if(self.last_office):
+            scan.socketio.send("Scanning offices 100 %" )
             scan.socketio.send("Operation Finished")
         return self
     def init_ip_list(self, ip_list, ip3):
