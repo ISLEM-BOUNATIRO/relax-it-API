@@ -8,7 +8,61 @@ import regex as re
 import os
 import scan_wilaya as sw
 import telnetlib
+from time import sleep
 socketio =SocketIO(app,cors_allowed_origins="*")
+def telnet_command(tn,command):
+
+    command=command+"\n"
+    tn.write(command.encode('ascii'))
+    tn.write(b"a\n")
+    output=(tn.read_until(b'% Ambiguous command:  "a"').decode('ascii'))
+    output=output.split('\n')
+    output=output[1:-2]
+    last_output=""
+    for line in output:
+        last_output=last_output+"\n"+line
+    return last_output
+
+global_telnet=0
+@socketio.on('access_telnet') 
+def handle_access_telnet(device_ip_and_command):
+    split=device_ip_and_command.split("&&&&")
+    device_ip=split[0]
+    command=split[1]    
+    print(command)
+    global global_telnet
+    if(command=="a"):
+        msg='% Ambiguous#command:  "a"'
+        socketio.send(msg)
+        return
+    if(command=="exit"):
+        global_telnet.write(b"exit\n")
+        global_telnet.close()
+        global_telnet=0
+        return
+    if(not global_telnet):
+        username = "admin"
+        password = "admin"
+        global_telnet = telnetlib.Telnet(device_ip)
+        global_telnet.read_until(b"Username: ")
+        global_telnet.write(username.encode('ascii') + b"\n")
+        global_telnet.read_until(b"Password: ")
+        global_telnet.write(password.encode('ascii') + b"\n")
+        global_telnet.write(b"terminal length 0\n")
+        global_telnet.read_until(b"#terminal length 0\r")
+
+
+    output=telnet_command(global_telnet,command)
+    print(output)
+    socketio.send(output)
+
+
+
+
+
+    
+
+
 @socketio.on('scan_bp') 
 def handlemsg(office_subnet):
     #asyncio.run(async_handler(office_subnet))
@@ -25,12 +79,12 @@ def handledisco():
     print('SOCKET CLOSED')
 
 @socketio.on('scan_wilaya') 
-def handledisco(wilaya_number):
-    socketio.send("Pinging offices of wilaya number "+str(wilaya_number))
+def handledisco(wilaya_subnet):
+    socketio.send("Pinging offices of wilaya number "+str(int(wilaya_subnet.split(".")[1])-64))
     office_subnet_three_bytes=[]
-    second_byte=int(wilaya_number)+64
+    wilaya_two_bytes=wilaya_subnet.split(".")[0]+"."+wilaya_subnet.split(".")[1]
     for third_byte in range(1,256):#ATTENTIOOOOON
-        office_subnet_three_bytes.append("10."+str(second_byte)+"."+str(third_byte)+".")
+        office_subnet_three_bytes.append(wilaya_two_bytes+"."+str(third_byte)+".")
         #print(office_subnet_three_bytes[third_byte-1])
     
     x=sw.scan_wilaya()

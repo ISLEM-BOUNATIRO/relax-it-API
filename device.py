@@ -8,8 +8,10 @@ from scan import reachable,get_cisco_device_info
 @app.route('/api/get_device_info',methods=['POST'])
 def get_device_info():
     ip=request.json['ip']
-    username=request.json['username']
-    password=request.json['password']
+    #username=request.json['username']
+    #password=request.json['password']
+    username='admin'
+    password='admin'
     ip=request.json['ip']
     if not reachable(ip): # PINGING THE ADDRESS
         return {"result": "error " +ip+" is unreachable"}

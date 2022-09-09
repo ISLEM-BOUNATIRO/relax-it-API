@@ -1,34 +1,28 @@
+import getpass
 import telnetlib
-import regex as re
-def show_version_fiberhome_telnet(ip,hostname,password):
-    tn = telnetlib.Telnet(ip)
+import time
+device_ip = "192.168.217.253"
+username = "admin"
+password = "admin"
+command="show version"
+def telnet_command(device_ip,username,password,command):
+    tn = telnetlib.Telnet(device_ip)
     tn.read_until(b"Username: ")
-    tn.write(hostname.encode('ascii') + b"\n")
+    tn.write(username.encode('ascii') + b"\n")
     tn.read_until(b"Password: ")
     tn.write(password.encode('ascii') + b"\n")
-    tn.write(b"show version\n")
-    output=tn.read_until(b"System Memory").decode('ascii')
-    tn.write(b"exit\n")
-    try:
-        # version 
-        regex_version = re.compile(r'\s\sUSP\s\(R\)\sSoftware\sVersion\s(.+)')
-        version = regex_version.findall(output)
-        version[0].replace('\r',' ')
-        # serial
-        regex_serial = re.compile(r'\s\sSerial\sNumber\s\s\s\s:\s(\S+)')
-        serial = regex_serial.findall(output)
-        #model
-        regex_model = re.compile(r'FiberHome\s(.+)')
-        model = regex_model.findall(output)
-        # hostname TODOOOOOOOOOOOOO
-        # regex_hostname = re.compile(r'Hostname:\s(\S+)')
-        # hostname = regex_hostname.findall(output)
-        # FIND EQUIVALENT sh run | in hostname FOR FIBERHOME
-        lista=[version[0].rstrip(),serial[0].rstrip(),model[2].rstrip()]#
-        return lista
-    except Exception as e:
-        return str(e)+"\n"+output
+    tn.write(b"terminal length 0\n")
+    tn.read_until(b"#terminal length 0\r")
+    command=command+"\n"
+    tn.write(command.encode('ascii'))
+    tn.write(b"byebye\n")
 
-p=show_version_fiberhome_telnet("10.117.5.226","admin","12345")
-print(p)
-       
+    output=(tn.read_until(b'#byebye').decode('ascii'))
+    output=output.split('\n')
+    output=output[1:-2]
+    last_output=""
+    for line in output:
+        last_output=last_output+"\n"+line
+    return last_output
+
+print(telnet_command(device_ip,username,password,command))

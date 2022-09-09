@@ -60,11 +60,14 @@ class scan_office_and_devices(object):
                     else:
                         message= result
                         scan.socketio.send(message) 
-               
-                
-                    off = office.Office(office_subnet= ip,name= d.hostname)
+                    spli=d.hostname.split("-")
+                    off_name=spli[1] +" "+spli[2]
+                    spli=ip.split('.')
+                    off_subnet=spli[0]+"."+spli[1]+"."+spli[2]+".0"
+                    off = office.Office(office_subnet= off_subnet,name= off_name)
+                    
+                    #replace later with get_device_type
                     fourth_byte=ip.split('.')[3]
-                
                     a=(fourth_byte=="254")
                     b=(fourth_byte=="1")
                     if a | b:

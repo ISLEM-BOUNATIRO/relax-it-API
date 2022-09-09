@@ -44,7 +44,7 @@ def disable_telnet(host,username,password,netmiko_device_type):
 def ssh_is_enabled(HOST,password):
     tn = telnetlib.Telnet(HOST)
     sleep(wait)              # wait for greeter
-    tn.read_very_eager(); 
+    tn.read_very_eager() 
     tn.write(password.encode('ascii') + b"\n")
     tn.write("enable\n".encode('ascii'))   
     tn.write((password+"\n").encode('ascii'))
