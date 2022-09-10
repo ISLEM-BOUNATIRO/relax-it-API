@@ -29,7 +29,7 @@ def handle_access_telnet(device_ip_and_command):
     split=device_ip_and_command.split("&&&&")
     device_ip=split[0]
     command=split[1]    
-    print(command)
+
     global global_telnet
     if(command=="a"):
         msg='% Ambiguous#command:  "a"'
@@ -53,6 +53,36 @@ def handle_access_telnet(device_ip_and_command):
 
 
     output=telnet_command(global_telnet,command)
+    print(output)
+    socketio.send(output)
+def get_netmiko_device_type(ip):
+    if(ip.split('.')[3]=="254"):
+        return "fortinet"
+        
+    return 'cisco_ios'
+
+def ssh_command(ip,username,password,command):   
+    myrouter = {
+        'device_type': get_netmiko_device_type(ip),
+        'ip': ip,
+        'username': username,
+        'password': password,
+    }
+
+    net_connect = ConnectHandler(**myrouter)
+    config_commands = command
+    return net_connect.send_config_set(config_commands)
+    
+@socketio.on('access_ssh') 
+def handle_access_telnet(device_ip_and_command):
+    split=device_ip_and_command.split("&&&&")
+    device_ip=split[0]
+    command=split[1]    
+    username = "admin"
+    password = "admin"
+
+
+    output=ssh_command(device_ip,username,password,command)
     print(output)
     socketio.send(output)
 
@@ -112,7 +142,7 @@ async def scan_device(ip:str):
 
 
 def reachable(host_ip):
-    host_state  = True if os.system("ping -n 2 " + host_ip) is 0 else False
+    host_state  = True if os.system("ping -n 2 " + host_ip) == 0 else False
     return host_state
 def get_device_type(ip):
     lista=["226","227","228","229","230"]

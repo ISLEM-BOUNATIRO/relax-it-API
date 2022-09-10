@@ -1,28 +1,30 @@
-import getpass
-import telnetlib
-import time
-device_ip = "192.168.217.253"
-username = "admin"
-password = "admin"
-command="show version"
-def telnet_command(device_ip,username,password,command):
-    tn = telnetlib.Telnet(device_ip)
-    tn.read_until(b"Username: ")
-    tn.write(username.encode('ascii') + b"\n")
-    tn.read_until(b"Password: ")
-    tn.write(password.encode('ascii') + b"\n")
-    tn.write(b"terminal length 0\n")
-    tn.read_until(b"#terminal length 0\r")
-    command=command+"\n"
-    tn.write(command.encode('ascii'))
-    tn.write(b"byebye\n")
+from netmiko import ConnectHandler
+#TO EXECUTE JUST ONE COMMAND
+#output = net_connect.send_command('get system status')
 
-    output=(tn.read_until(b'#byebye').decode('ascii'))
-    output=output.split('\n')
-    output=output[1:-2]
-    last_output=""
-    for line in output:
-        last_output=last_output+"\n"+line
-    return last_output
+def get_netmiko_device_type(ip):
+    if(ip.split('.')[3]=="254"):
+        return "fortinet"
+        
+    return 'cisco_ios'
 
-print(telnet_command(device_ip,username,password,command))
+def execute_config_ssh(ip,username,password):   
+    myrouter = {
+        'device_type': get_netmiko_device_type(ip),
+        'ip': ip,
+        'username': username,
+        'password': password,
+    }
+
+    net_connect = ConnectHandler(**myrouter)
+    config_commands = "hostname C1841-Alger-5"
+    output = net_connect.send_config_set(config_commands)
+    print(output)
+
+hostname="C1841-Alger-5"
+device_type='Cisco'
+ip ="192.168.217.253"
+username="admin"
+password="admin"
+
+execute_config_ssh(ip,username,password)
