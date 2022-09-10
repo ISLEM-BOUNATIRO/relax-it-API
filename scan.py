@@ -70,10 +70,9 @@ def ssh_connect(ip,username,password):
         'username': username,
         'password': password,
     }
-
     return ConnectHandler(**myrouter)
 
-ssh_connection=-1
+ssh_connection=0
 @socketio.on('access_ssh') 
 def handle_access_telnet(device_ip_and_command):
     split=device_ip_and_command.split("&&&&")
@@ -83,16 +82,24 @@ def handle_access_telnet(device_ip_and_command):
     username = "admin"
     password = "admin"
     global ssh_connection
-    if(ssh_connection==-1):
+    if(not ssh_connection):
         ssh_connection=ssh_connect(device_ip,username,password)
+        socketio.send("#You are in configuration mode \nplease add 'do' before your command to excute it in exec mode ")
     if(command=="disconnect"):
         ssh_connection.disconnect()
-        ssh_connection=-1
+        ssh_connection=0
         socketio.send("#Disconnected")
         return    
-    output=ssh_connection.send_command(command)
-    print(output)
-    socketio.send(output)
+    ssh_connection.enable()
+    ssh_connection.find_prompt() + "\n"
+    output=ssh_connection.send_config_set(command,cmd_verify=False)
+    output=output.split('\n')
+    output=output[2:-2]
+    last_output=""
+    for line in output:
+        last_output=last_output+"\n"+line
+    socketio.send(last_output)
+    
 
 
 
