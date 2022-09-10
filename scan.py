@@ -31,15 +31,6 @@ def handle_access_telnet(device_ip_and_command):
     command=split[1]    
 
     global global_telnet
-    if(command=="a"):
-        msg='% Ambiguous#command:  "a"'
-        socketio.send(msg)
-        return
-    if(command=="exit"):
-        global_telnet.write(b"exit\n")
-        global_telnet.close()
-        global_telnet=0
-        return
     if(not global_telnet):
         username = "admin"
         password = "admin"
@@ -50,7 +41,18 @@ def handle_access_telnet(device_ip_and_command):
         global_telnet.write(password.encode('ascii') + b"\n")
         global_telnet.write(b"terminal length 0\n")
         global_telnet.read_until(b"#terminal length 0\r")
+    if(command=="a"):
+        msg='% Ambiguous#command:  "a"'
+        socketio.send(msg)
+        return
 
+    if(command=="disconnect"):
+        global_telnet.write(b"exit\n")
+        global_telnet.close()
+        global_telnet=0
+        socketio.send("#Disconnected")
+        print('#DIIIIIIIIISCOOOOOOOOOONECTED')
+        return
 
     output=telnet_command(global_telnet,command)
     print(output)
@@ -61,7 +63,7 @@ def get_netmiko_device_type(ip):
         
     return 'cisco_ios'
 
-def ssh_command(ip,username,password,command):   
+def ssh_connect(ip,username,password):   
     myrouter = {
         'device_type': get_netmiko_device_type(ip),
         'ip': ip,
@@ -69,20 +71,26 @@ def ssh_command(ip,username,password,command):
         'password': password,
     }
 
-    net_connect = ConnectHandler(**myrouter)
-    config_commands = command
-    return net_connect.send_config_set(config_commands)
-    
+    return ConnectHandler(**myrouter)
+
+ssh_connection=-1
 @socketio.on('access_ssh') 
 def handle_access_telnet(device_ip_and_command):
     split=device_ip_and_command.split("&&&&")
     device_ip=split[0]
     command=split[1]    
+    print(device_ip+"  "+command)
     username = "admin"
     password = "admin"
-
-
-    output=ssh_command(device_ip,username,password,command)
+    global ssh_connection
+    if(ssh_connection==-1):
+        ssh_connection=ssh_connect(device_ip,username,password)
+    if(command=="disconnect"):
+        ssh_connection.disconnect()
+        ssh_connection=-1
+        socketio.send("#Disconnected")
+        return    
+    output=ssh_connection.send_command(command)
     print(output)
     socketio.send(output)
 
