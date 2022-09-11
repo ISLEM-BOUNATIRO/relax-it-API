@@ -352,3 +352,61 @@ def get_fiberhome_info(ip,username,password):
             return -1
 
 
+
+
+
+
+def excute_script(ip,username,password,commands):
+    tn = telnetlib.Telnet(ip)
+    tn.read_until(b"Username: ")
+    tn.write(username.encode('ascii') + b"\n")
+    tn.read_until(b"Password: ")
+    tn.write(password.encode('ascii') + b"\n")
+    tn.write(b"terminal length 0\n")
+    tn.read_until(b"#terminal length 0\r") 
+    for i in range(len(commands)):
+        command = str(commands[i])+"\n"
+        tn.write(command.encode('ascii'))
+    tn.write(b"end\n")
+    tn.write(b"exit\n")
+    output=tn.read_all().decode('ascii')
+    return output
+def excute_script_fortinet(ip,username,password,commands):
+    tn = telnetlib.Telnet(ip)
+    tn.read_until(b"login: ")
+    tn.write(username.encode('ascii') + b"\n")
+    tn.read_until(b"Password: ")
+    tn.write(password.encode('ascii') + b"\n")
+    tn.write("-------\n".encode('ascii'))
+    tn.read_until(b"# -------\r\r\nUnknown action 0").decode('ascii')  
+    
+    for i in range(len(commands)):
+        command = str(commands[i])+"\n"
+        tn.write(command.encode('ascii'))
+    tn.write("-------\n".encode('ascii'))
+    output= tn.read_until(b"# -------\r\r\nUnknown action 0").decode('ascii')
+    output=output.split('\n')
+    output=output[2:-3]
+    last_output=""
+    for line in output:
+        last_output=last_output+"\n"+line
+    
+    return last_output.replace('\n-------\r\n','')[1:-1]   
+@socketio.on('execute_script_device') 
+def execute_script_socket(device_ip_and_script):
+    split=device_ip_and_script.split("&&&&")
+    device_ip=split[0]
+    script=split[1] 
+    script = Script.query.filter_by(name=script).first()
+    commands=script.content.split('\n')
+    username="admin"
+    password="admin"
+    output="something went wrong"
+    if(not(get_device_type(device_ip)=="Firewall")):
+        output=excute_script(device_ip,username,password,commands)
+        output=output[1:-1]
+    elif(get_device_type(device_ip)=="Firewall"):
+        output=excute_script_fortinet(device_ip,username,password,commands)
+
+    socketio.send(output)
+    

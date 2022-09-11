@@ -41,7 +41,6 @@ def excute_script(ip,username,password,commands):
     tn.write(b"end\n")
     tn.write(b"exit\n")
     output=tn.read_all().decode('ascii')
-    print (output)
     return output
 def excute_script_fortinet(ip,username,password,commands):
     tn = telnetlib.Telnet(ip)
@@ -56,8 +55,9 @@ def excute_script_fortinet(ip,username,password,commands):
         command = str(commands[i])+"\n"
         tn.write(command.encode('ascii'))
     tn.write("-------\n".encode('ascii'))
-    output= tn.read_until(b"# -------\r\r\nUnknown action 0").decode('ascii')
-    output=output.split('\n')
+    output= tn.read_until(b"# -------\r\r\nUnknown action 0")
+    print(output)
+    output=output.decode('ascii').split('\n')
     output=output[1:-3]
     last_output=""
     for line in output:
@@ -79,9 +79,6 @@ def execute_script_api():
         output=output[1:-1]
     elif(get_device_type(ip)=="Firewall"):
         output=excute_script_fortinet(ip,username,password,commands)
-        
-    
-    
     return {"output":output}
     
 @app.route('/api/scripts',methods=['POST'])
