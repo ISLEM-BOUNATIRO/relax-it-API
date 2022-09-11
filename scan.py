@@ -11,13 +11,18 @@ import telnetlib
 from time import sleep
 socketio =SocketIO(app,cors_allowed_origins="*")
 def telnet_command(tn,command):
-
+    
     command=command+"\n"
+    
     tn.write(command.encode('ascii'))
+    if("ping" in  command.lower()):
+        sleep(2)    
     tn.write(b"a\n")
+
     output=(tn.read_until(b'% Ambiguous command:  "a"').decode('ascii'))
     output=output.split('\n')
     output=output[1:-2]
+    
     last_output=""
     for line in output:
         last_output=last_output+"\n"+line
@@ -68,7 +73,7 @@ def handle_access_telnet(device_ip_and_command):
         global_telnet.write(b"exit\n")
         global_telnet.close()
         global_telnet=0
-        #socketio.send("#Disconnected")
+        
         print("#Telnet Disconnected")
 
         return
@@ -76,6 +81,7 @@ def handle_access_telnet(device_ip_and_command):
         output=telnet_command(global_telnet,command)
     else:
         output=telnet_command_fortinet(global_telnet,command)
+    
     socketio.send(output)
 
 
@@ -392,13 +398,8 @@ def excute_script_fortinet(ip,username,password,commands):
         last_output=last_output+"\n"+line
     
     return last_output.replace('\n-------\r\n','')[1:-1]   
-@socketio.on('execute_script_device') 
-def execute_script_socket(device_ip_and_script):
-    split=device_ip_and_script.split("&&&&")
-    device_ip=split[0]
-    script=split[1] 
-    script = Script.query.filter_by(name=script).first()
-    commands=script.content.split('\n')
+
+def launch_script_execution(device_ip,commands):
     username="admin"
     password="admin"
     output="something went wrong"
@@ -407,6 +408,26 @@ def execute_script_socket(device_ip_and_script):
         output=output[1:-1]
     elif(get_device_type(device_ip)=="Firewall"):
         output=excute_script_fortinet(device_ip,username,password,commands)
-
     socketio.send(output)
-    
+
+@socketio.on('execute_script_device') 
+def execute_script_socket(device_ip_and_script):
+    split=device_ip_and_script.split("&&&&")
+    device_ip=split[0]
+    script_name=split[1] 
+    script = Script.query.filter_by(name=script_name).first()
+    commands=script.content.split('\n')
+    launch_script_execution(device_ip,commands)
+
+@socketio.on('execute_script_group') 
+def execute_script_socket_group(group_and_script):
+    split=group_and_script.split("&&&&")
+    group_name=split[0]
+    script_name=split[1] 
+    script = Script.query.filter_by(name=script_name).first()
+    commands=script.content.split('\n')
+    group = Group.query.filter_by(name=group_name).first()
+    members=group.members.split(',')
+    for member in members:
+        socketio.send(f"----Executing script {script_name} on {member}----\n")
+        launch_script_execution(member,commands)
