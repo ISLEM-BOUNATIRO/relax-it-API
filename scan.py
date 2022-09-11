@@ -25,14 +25,13 @@ def telnet_command(tn,command):
 def telnet_command_fortinet(tn,command):
     command=command+"\n"
     tn.write(command.encode('ascii'))
-    tn.write("endeocrino\n".encode('ascii'))
-    output=tn.read_until(b"# endeocrino\r\r\nUnknown action 0").decode('ascii')
+    tn.write("-------\n".encode('ascii'))
+    output=tn.read_until(b"# -------\r\r\nUnknown action 0").decode('ascii')
     output=output.split('\n')
     output=output[1:-2]
     last_output=""
     for line in output:
         last_output=last_output+"\n"+line
-    print(last_output)
     return last_output    
 
 global_telnet=0
@@ -57,6 +56,9 @@ def handle_access_telnet(device_ip_and_command):
         if(get_device_type(device_ip)!="Firewall"):
             global_telnet.write(b"terminal length 0\n")
             global_telnet.read_until(b"#terminal length 0\r")
+        else:
+            global_telnet.write("-------\n".encode('ascii'))
+            global_telnet.read_until(b"# -------\r\r\nUnknown action 0").decode('ascii')
     if(command=="a"):
         msg='% Ambiguous#command:  "a"'
         socketio.send(msg)

@@ -29,21 +29,41 @@ def get_device_type(ip):
 
 def excute_script(ip,username,password,commands):
     tn = telnetlib.Telnet(ip)
-    if(get_device_type(ip)=="Firewall"):
-        tn.read_until(b"login: ")
-    else:
-        tn.read_until(b"Username: ")
+    tn.read_until(b"Username: ")
     tn.write(username.encode('ascii') + b"\n")
     tn.read_until(b"Password: ")
     tn.write(password.encode('ascii') + b"\n")
     tn.write(b"terminal length 0\n")
-    tn.read_until(b"#terminal length 0\r")     
+    tn.read_until(b"#terminal length 0\r") 
+    for i in range(len(commands)):
+        command = str(commands[i])+"\n"
+        tn.write(command.encode('ascii'))
+    tn.write(b"end\n")
+    tn.write(b"exit\n")
+    output=tn.read_all().decode('ascii')
+    print (output)
+    return output
+def excute_script_fortinet(ip,username,password,commands):
+    tn = telnetlib.Telnet(ip)
+    tn.read_until(b"login: ")
+    tn.write(username.encode('ascii') + b"\n")
+    tn.read_until(b"Password: ")
+    tn.write(password.encode('ascii') + b"\n")
+    tn.write("-------\n".encode('ascii'))
+    tn.read_until(b"# -------\r\r\nUnknown action 0").decode('ascii')  
     
     for i in range(len(commands)):
         command = str(commands[i])+"\n"
         tn.write(command.encode('ascii'))
-    tn.write(b"exit\n")
-    return tn.read_all().decode('ascii')
+    tn.write("-------\n".encode('ascii'))
+    output= tn.read_until(b"# -------\r\r\nUnknown action 0").decode('ascii')
+    output=output.split('\n')
+    output=output[1:-3]
+    last_output=""
+    for line in output:
+        last_output=last_output+"\n"+line
+
+    return last_output    
 @app.route('/api/execute_script',methods=['POST'])
 def execute_script_api():
     name = request.json['name']
@@ -52,11 +72,16 @@ def execute_script_api():
     commands=script.content.split('\n')
     username="admin"
     password="admin"
-    if(get_device_type(ip)!="Firewall"):
-        commands.append("end\n")
+    
+    output="something went wrong"
+    if(not(get_device_type(ip)=="Firewall")):
+        output=excute_script(ip,username,password,commands)
+        output=output[1:-1]
+    elif(get_device_type(ip)=="Firewall"):
+        output=excute_script_fortinet(ip,username,password,commands)
         
-    output=excute_script(ip,username,password,commands)
-    output=output[1:-1]
+    
+    
     return {"output":output}
     
 @app.route('/api/scripts',methods=['POST'])
