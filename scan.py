@@ -51,11 +51,11 @@ def handle_access_telnet(device_ip_and_command):
         global_telnet.close()
         global_telnet=0
         socketio.send("#Disconnected")
-        print('#DIIIIIIIIISCOOOOOOOOOONECTED')
+
         return
 
     output=telnet_command(global_telnet,command)
-    print(output)
+
     socketio.send(output)
 def get_netmiko_device_type(ip):
     if(ip.split('.')[3]=="254"):
@@ -78,7 +78,6 @@ def handle_access_telnet(device_ip_and_command):
     split=device_ip_and_command.split("&&&&")
     device_ip=split[0]
     command=split[1]    
-    print(device_ip+"  "+command)
     username = "admin"
     password = "admin"
     global ssh_connection
@@ -130,7 +129,7 @@ def handledisco(wilaya_subnet):
     wilaya_two_bytes=wilaya_subnet.split(".")[0]+"."+wilaya_subnet.split(".")[1]
     for third_byte in range(1,256):#ATTENTIOOOOON
         office_subnet_three_bytes.append(wilaya_two_bytes+"."+str(third_byte)+".")
-        #print(office_subnet_three_bytes[third_byte-1])
+
     
     x=sw.scan_wilaya()
     x.thread_count = 256

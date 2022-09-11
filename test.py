@@ -1,50 +1,25 @@
-from netmiko import *
-from netmiko import ConnectHandler
-
-#TO EXECUTE JUST ONE COMMAND
-#output = net_connect.send_command('get system status')
-
-def get_netmiko_device_type(ip):
-    if(ip.split('.')[3]=="254"):
-        return "fortinet"
-        
-    return 'cisco_ios'
-
-def execute_config_ssh(ip,username,password):   
-    myrouter = {
-        'device_type': get_netmiko_device_type(ip),
-        'ip': ip,
-        'username': username,
-        'password': password,
-    }
-
-    net_connect = ConnectHandler(**myrouter)
-    config_commands = "hostname C1841-Alger-5"
-    output = net_connect.send_config_set(config_commands)
-    print(output)
-
+import telnetlib
 hostname="C1841-Alger-5"
 device_type='Cisco'
 ip ="192.168.217.253"
 username="admin"
 password="admin"
-#execute_config_ssh(ip,username,password)
+commands = ["conf t","hostname milou","hostname C1841-Alger-5","end"]
 
-mydevice = {
-    'device_type': get_netmiko_device_type(ip),
-    'ip': ip,
-    'username': username,
-    'password': password,
-} 
+def excute_script(ip,username,password,commands):
+    tn = telnetlib.Telnet(ip)
+    tn.read_until(b"Username: ")
+    tn.write(username.encode('ascii') + b"\n")
+    tn.read_until(b"Password: ")
+    tn.write(password.encode('ascii') + b"\n")
+    tn.write(b"terminal length 0\n")
+    tn.read_until(b"#terminal length 0\r")     
+    
+    for i in range(len(commands)):
+        command = str(commands[i])+"\n"
+        tn.write(command.encode('ascii'))
+    tn.write(b"exit\n")
+    return tn.read_all().decode('ascii')
+    
 
-net_connect = ConnectHandler(**mydevice)
-command = "show"
-
-net_connect.enable()
-net_connect.find_prompt() + "\n"
-
-output = net_connect.send_command(command)
-
-
-
-print(output)
+print(excute_script(ip,username,password,commands))
