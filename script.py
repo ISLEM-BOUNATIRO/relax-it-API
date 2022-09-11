@@ -15,9 +15,24 @@ def get_script():
     script_schema = ScriptSchema()
     output = script_schema.dump(script)
     return jsonify(output)
+
+def get_device_type(ip):
+    lista=["226","227","228","229","230"]
+    fourth_byte=ip.split('.')[3]
+    if (fourth_byte=="253" or fourth_byte=="1"):
+        return "Router"
+    if (fourth_byte=="254"):
+        return "Firewall"
+    if (fourth_byte in lista):
+        return "Switch"
+    return ""
+
 def excute_script(ip,username,password,commands):
     tn = telnetlib.Telnet(ip)
-    tn.read_until(b"Username: ")
+    if(get_device_type(ip)=="Firewall"):
+        tn.read_until(b"login: ")
+    else:
+        tn.read_until(b"Username: ")
     tn.write(username.encode('ascii') + b"\n")
     tn.read_until(b"Password: ")
     tn.write(password.encode('ascii') + b"\n")
@@ -37,7 +52,9 @@ def execute_script_api():
     commands=script.content.split('\n')
     username="admin"
     password="admin"
-    commands.append("end\n")
+    if(get_device_type(ip)!="Firewall"):
+        commands.append("end\n")
+        
     output=excute_script(ip,username,password,commands)
     output=output[1:-1]
     return {"output":output}

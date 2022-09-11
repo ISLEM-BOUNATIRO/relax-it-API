@@ -19,3 +19,19 @@ Transport input all
 Password islem
 login
 enable password islem
+
+
+FIREWALL
+
+config system interface
+edit port1
+set mode static
+set ip 192.168.217.254 255.255.255.0
+set allowaccess ping ssh telnet
+end
+
+show system interface port1
+
+
+config system console
+set output standard

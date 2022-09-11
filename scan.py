@@ -22,6 +22,18 @@ def telnet_command(tn,command):
     for line in output:
         last_output=last_output+"\n"+line
     return last_output
+def telnet_command_fortinet(tn,command):
+    command=command+"\n"
+    tn.write(command.encode('ascii'))
+    tn.write("endeocrino\n".encode('ascii'))
+    output=tn.read_until(b"# endeocrino\r\r\nUnknown action 0").decode('ascii')
+    output=output.split('\n')
+    output=output[1:-2]
+    last_output=""
+    for line in output:
+        last_output=last_output+"\n"+line
+    print(last_output)
+    return last_output    
 
 global_telnet=0
 @socketio.on('access_telnet') 
@@ -35,12 +47,16 @@ def handle_access_telnet(device_ip_and_command):
         username = "admin"
         password = "admin"
         global_telnet = telnetlib.Telnet(device_ip)
-        global_telnet.read_until(b"Username: ")
+        if(get_device_type(device_ip)=="Firewall"):
+            global_telnet.read_until(b"login: ")
+        else:
+            global_telnet.read_until(b"Username: ")
         global_telnet.write(username.encode('ascii') + b"\n")
         global_telnet.read_until(b"Password: ")
         global_telnet.write(password.encode('ascii') + b"\n")
-        global_telnet.write(b"terminal length 0\n")
-        global_telnet.read_until(b"#terminal length 0\r")
+        if(get_device_type(device_ip)!="Firewall"):
+            global_telnet.write(b"terminal length 0\n")
+            global_telnet.read_until(b"#terminal length 0\r")
     if(command=="a"):
         msg='% Ambiguous#command:  "a"'
         socketio.send(msg)
@@ -50,13 +66,20 @@ def handle_access_telnet(device_ip_and_command):
         global_telnet.write(b"exit\n")
         global_telnet.close()
         global_telnet=0
-        socketio.send("#Disconnected")
+        #socketio.send("#Disconnected")
+        print("#Telnet Disconnected")
 
         return
-
-    output=telnet_command(global_telnet,command)
-
+    if(get_device_type(device_ip)!="Firewall"):
+        output=telnet_command(global_telnet,command)
+    else:
+        output=telnet_command_fortinet(global_telnet,command)
     socketio.send(output)
+
+
+
+
+
 def get_netmiko_device_type(ip):
     if(ip.split('.')[3]=="254"):
         return "fortinet"
@@ -74,7 +97,7 @@ def ssh_connect(ip,username,password):
 
 ssh_connection=0
 @socketio.on('access_ssh') 
-def handle_access_telnet(device_ip_and_command):
+def handle_access_ssh(device_ip_and_command):
     split=device_ip_and_command.split("&&&&")
     device_ip=split[0]
     command=split[1]    
@@ -88,6 +111,7 @@ def handle_access_telnet(device_ip_and_command):
         ssh_connection.disconnect()
         ssh_connection=0
         socketio.send("#Disconnected")
+ 
         return    
     ssh_connection.enable()
     ssh_connection.find_prompt() + "\n"
@@ -229,7 +253,7 @@ def get_fortinet_info(ip):
                 'device_type': 'fortinet',
                 'ip': ip,
                 'username': 'admin',  # ssh username
-                'password': 'admin12345',  # ssh password
+                'password': 'admin',  # ssh password
             }
 
     try:
