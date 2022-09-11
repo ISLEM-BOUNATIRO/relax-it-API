@@ -373,6 +373,9 @@ def excute_script(ip,username,password,commands):
     for i in range(len(commands)):
         command = str(commands[i])+"\n"
         tn.write(command.encode('ascii'))
+        if("ping" in  command.lower()):
+            sleep(2)  
+
     tn.write(b"end\n")
     tn.write(b"exit\n")
     output=tn.read_all().decode('ascii')
