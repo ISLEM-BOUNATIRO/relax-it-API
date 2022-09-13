@@ -1,5 +1,5 @@
 The commands below are from Global Configuration mode.
-enable password islem
+enable password admin
 
 f les switch
 GIVE AN IP TO THE SVI VLAN 1 AND START IT UP
@@ -9,16 +9,16 @@ no shut down
 
 f routers 
 conf t
-enable password islem
+enable password admin
 int f0
 no sh
 ip address dhcp
 
 Line vty 0 15
 Transport input all
-Password islem
+Password admin
 login
-enable password islem
+enable password admin
 
 
 FIREWALL
@@ -35,3 +35,4 @@ show system interface port1
 
 config system console
 set output standard
+end
