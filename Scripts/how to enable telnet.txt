@@ -4,21 +4,22 @@ enable password admin
 f les switch
 GIVE AN IP TO THE SVI VLAN 1 AND START IT UP
 interface vlan 1
-ip address 192.168.1.1 255.255.255.0
-no shut down
+ip address 192.168.217.226 255.255.255.0
+no shutdown
 
 f routers 
 conf t
 enable password admin
-int f0
+int f0/0
+ip address 192.168.217.253 255.255.255.0
 no sh
-ip address dhcp
-
+duplex full
 Line vty 0 15
 Transport input all
 Password admin
 login
-enable password admin
+do wr
+
 
 
 FIREWALL
@@ -27,7 +28,7 @@ config system interface
 edit port1
 set mode static
 set ip 192.168.217.254 255.255.255.0
-set allowaccess ping ssh telnet
+set allowaccess ping ssh telnet https http
 end
 
 show system interface port1
