@@ -84,10 +84,6 @@ def handle_access_telnet(device_ip_and_command):
     
     socketio.send(output)
 
-
-
-
-
 def get_netmiko_device_type(ip):
     if(ip.split('.')[3]=="254"):
         return "fortinet"
@@ -132,13 +128,6 @@ def handle_access_ssh(device_ip_and_command):
     socketio.send(last_output)
     
 
-
-
-
-
-    
-
-
 @socketio.on('scan_bp') 
 def handlemsg(office_subnet):
     #asyncio.run(async_handler(office_subnet))
@@ -168,12 +157,6 @@ def handledisco(wilaya_subnet):
     x.ips=office_subnet_three_bytes
     x.start()
     
-    
-
-
-
-    
-    
 
 
 async def async_handler(office_subnet):
@@ -193,10 +176,11 @@ def reachable(host_ip):
 def get_device_type(ip):
     lista=["226","227","228","229","230","61","125"]
     fourth_byte=ip.split('.')[3]
-    if (fourth_byte=="253" or fourth_byte=="1"):
-        return "Router"
+    print("PRIIIIIIIIIIINT "+fourth_byte)
     if (fourth_byte=="254"):
         return "Firewall"
+    if (fourth_byte=="253" or fourth_byte=="1"):
+        return "Router"
     if (fourth_byte in lista):
         return "Switch"
     return ""

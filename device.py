@@ -1,6 +1,6 @@
 from app import app,jsonify,request
 from model import *
-from scan import reachable,get_cisco_device_info
+from scan import reachable,get_cisco_device_info,get_device_type,get_fortinet_info
 #FORTICLIENT
 #Username islem.bounatiro
 #Password j2t$vTbq
@@ -15,11 +15,17 @@ def get_device_info():
     ip=request.json['ip']
     if not reachable(ip): # PINGING THE ADDRESS
         return {"result": "error " +ip+" is unreachable"}
-    else:
+    elif(get_device_type(ip)=="Firewall" ):
+        device=get_fortinet_info(ip)
+        device_schema = DeviceSchema()
+        output = device_schema.dump(device)
+        return jsonify(output)
+    elif(get_device_type(ip)=="Router" or get_device_type(ip)=="Switch"):
         device=get_cisco_device_info(ip,username,password)
         device_schema = DeviceSchema()
         output = device_schema.dump(device)
         return jsonify(output)
+    
         
 @app.route('/api/devices')
 def get_devices():
