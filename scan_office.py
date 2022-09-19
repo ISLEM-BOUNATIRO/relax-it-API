@@ -44,13 +44,14 @@ class scan_office_and_devices(object):
                 elif(scan.get_device_type(ip)=="Router"):
                     d=scan.get_cisco_device_info(ip,"admin","admin")
                 elif(scan.get_device_type(ip)=="Switch"):
+                    d=scan.get_cisco_device_info(ip,"admin","admin")
                     #LOOP OVER ALL USERNAMES UNTIL U GET THE RIGHT ONE
                     #d=scan.get_cisco_device_info(ip,"admin","admin")
                     #GET_SWITCH_VENDOR()
                     #d=scan.get_cisco_device_info(ip,"cisco","cisco")
                     #for now 3ndna ghir fiberhome
-                    if(ip=="10.117.5.226"):
-                        d=scan.get_fiberhome_info(ip,"admin","12345")
+                    #if(ip=="10.117.5.226"):
+                    #    d=scan.get_fiberhome_info(ip,"admin","12345")
                     
                 if(d!=-1):
                     result=device.add_device(d)["result"]

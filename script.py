@@ -17,7 +17,7 @@ def get_script():
     return jsonify(output)
 
 def get_device_type(ip):
-    lista=["226","227","228","229","230"]
+    lista=["226","227","228","229","230","61","125"]
     fourth_byte=ip.split('.')[3]
     if (fourth_byte=="253" or fourth_byte=="1"):
         return "Router"

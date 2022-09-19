@@ -144,7 +144,7 @@ def handlemsg(office_subnet):
     #asyncio.run(async_handler(office_subnet))
     socketio.send("Scanning office  "+str(office_subnet))
     office_subnet=office_subnet[0:len(office_subnet)-1]
-    ip_list=[254,253,1,226,227,228,229,230]
+    ip_list=[254,253,61,125]
     #1,226,227,228,229,230
     x=scan_office_and_devices()
     x.thread_count = 256
@@ -191,7 +191,7 @@ def reachable(host_ip):
     host_state  = True if os.system("ping -n 2 " + host_ip) == 0 else False
     return host_state
 def get_device_type(ip):
-    lista=["226","227","228","229","230"]
+    lista=["226","227","228","229","230","61","125"]
     fourth_byte=ip.split('.')[3]
     if (fourth_byte=="253" or fourth_byte=="1"):
         return "Router"
